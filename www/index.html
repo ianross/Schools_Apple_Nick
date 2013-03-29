@@ -1,0 +1,2312 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/html">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>App</title>
+    <script type="text/javascript" charset="utf-8" src="./cordova-2.2.0.js"></script>
+    <link rel="stylesheet"  href="css/themes/default/jquery.mobile.structure-1.1.1.min.css" />
+    <link rel="stylesheet"  href="css/themes/default/summer.css" />
+    <script src="js/jquery.js"></script>
+    <script src="js/jquery.mobile-1.1.1.min.js"></script>
+    <script src="js/jquery.blockUI.js"></script>
+
+    <style>
+        .center-wrapper {
+            text-align: center;
+            width: 300px;
+            margin:0 auto;
+            margin-left:auto;
+            margin-right:auto;
+            align:center;
+            text-align:center;
+        }
+
+        .ui-footer .ui-controlgroup-horizontall {
+            display: table;
+            margin: 0 auto;
+        }
+
+        .prev-selected {
+            background-color:"silver";
+        }
+    </style>
+
+</head>
+<body>
+
+<script src="js/db.js"></script>
+
+
+<script>
+
+$(function() {
+    document.addEventListener("deviceready",onDeviceReady,true);
+});
+
+function onDeviceReady() {
+
+    if(navigator.splashscreen) {
+
+        setTimeout(function() {
+            navigator.splashscreen.hide();
+        }, 2000);
+    }
+}
+
+function checkConnection() {
+
+    if(navigator.connection) {
+    var networkState = navigator.connection.type;
+
+    var states = {};
+    states[Connection.UNKNOWN]  = 'Unknown';
+    states[Connection.ETHERNET] = 'Network Detected';
+    states[Connection.WIFI]     = 'WiFi Detected';
+    states[Connection.CELL_2G]  = '2G Detected';
+    states[Connection.CELL_3G]  = '3G Detected';
+    states[Connection.CELL_4G]  = '4G Detected';
+    states[Connection.NONE]     = 'No Internet Detected';
+
+    return states[networkState];
+
+    }
+    else {
+        return "No Internet Detected"
+    }
+}
+
+String.prototype.trim = function() {
+    return this.replace(/^\s+|\s+$/g,"");
+}
+String.prototype.ltrim = function() {
+    return this.replace(/^\s+/,"");
+}
+String.prototype.rtrim = function() {
+    return this.replace(/\s+$/,"");
+}
+
+//Types of update... remove current then add for all?
+var UpdateContent = [];
+
+create = function(obj, func){
+    var f = function(){
+        var target = arguments.callee.target;
+        var func = arguments.callee.func;
+        return func.apply(target, arguments);
+    };
+
+    f.target = obj;
+    f.func = func;
+    return f;
+}
+
+function GenerateList() {
+    for(var i=0; i<Students.length; i++) {
+        $('#list').append('<li style="text-align:center" data-theme="c" class="ui-li ui-li-static ui-body-c">' + Students[i].name + '</li>');
+    }
+}
+
+function GenerateEditList() {
+
+    for(var i=0; i<Students.length; i++) {
+        var li = $("<li style='text-align:center; cursor:pointer;margin-top:10px;' data-theme='i' class='ui-li ui-li-static ui-body-i'>" + Students[i].name + "</li>");
+        var ci = i;
+        li[0].setAttribute('number',i);
+        li[0].onclick = create(ci, EditStudent);
+        $('#editlist').append(li);
+    }
+}
+
+function GenerateDeleteList() {
+
+    for(var i=0; i<Students.length; i++) {
+        var li = $("<li style='text-align:center; cursor:pointer;margin-top:10px;' data-theme='i' data-icon='delete' class='ui-li ui-li-static ui-body-i' >" + Students[i].name + "</li>");
+        var ci = i;
+        li[0].setAttribute('number',i);
+        li[0].onclick = create(ci, RemoveStudent);
+        $('#deletelist').append(li).trigger("create");
+    }
+}
+
+function GenerateCaptureImageList() {
+    for(var i=0; i<Students.length; i++) {
+        var li = $("<li style='text-align:center; cursor:pointer;margin-top:10px;' data-theme='i' data-icon='delete' class='ui-li ui-li-static ui-body-i' >" + Students[i].name + "</li>");
+        var ci = i;
+        li[0].setAttribute('number',i);
+        li[0].onclick = create(ci, InitCamera);
+        $('#captureimagelist').append(li).trigger("create");
+    }
+}
+
+function GenerateCaptureNoteList() {
+    for(var i=0; i<Students.length; i++) {
+        var li = $("<li style='text-align:center; cursor:pointer;margin-top:10px;' data-theme='i' data-icon='delete' class='ui-li ui-li-static ui-body-i' >" + Students[i].name + "</li>");
+        var ci = i;
+        li[0].setAttribute('number',i);
+        li[0].onclick = create(ci, InitNotes);
+        $('#capturenotelist').append(li).trigger("create");
+    }
+}
+
+function LoadEditImage() {
+    CurrentEdit = this;
+    location.href="#EditImagePage";
+}
+
+function LoadEditNote() {
+    CurrentEdit = this;
+    $('#textarea-edit').val('');
+    $('#textarea-edit').val(CurrentEdit.note);
+    location.href="#EditNotePage";
+}
+
+function AttemptUpdateNote() {
+    //Copy of notes..
+
+    var clone = CurrentStudent.notes.slice(0);
+    CurrentEdit.note = $('#textarea-edit').val();
+    clone[CurrentEdit.index] = $('#textarea-edit').val();
+    //Now we have updated array...
+    CallbackData = PrepDBData(clone);
+    UpdateStudentCustomCallbackInDB(CurrentStudent.name, PrepDBData(CurrentStudent.images), CallbackData, editNoteSuccess)
+
+}
+
+function AttemptDeleteNote() {
+    //Copy of notes...
+    var clone = CurrentStudent.notes.slice(0);
+    clone.splice(CurrentEdit.index,1);
+    CallbackData = clone;
+    UpdateStudentCustomCallbackInDB(CurrentStudent.name, PrepDBData(CurrentStudent.images), PrepDBData(clone), deleteNoteSuccess)
+
+}
+
+function AttemptUpdateImage() {
+    //Copy of images...
+    var clone = CurrentStudent.images.slice(0);
+    clone[CurrentEdit.index] = CurrentEdit.image;
+    //Now we have updated array...
+    CallbackData = PrepDBData(clone);
+    UpdateStudentCustomCallbackInDB(CurrentStudent.name, CallbackData, PrepDBData(CurrentStudent.notes), editImageSuccess)
+}
+
+function RemoveImage() {
+
+    //Copy of notes...
+    var clone = CurrentStudent.images.slice(0);
+    clone.splice(this.index,1);
+    CallbackData = clone;
+    UpdateStudentImagesCustomCallbackInDB(CurrentStudent.name, PrepDBData(clone), updateImageDeleteSuccess)
+
+}
+
+//Used to display / delete student images
+function GenerateImageGrid() {
+    if(CurrentStudent.name != "No Student Selected") {
+        //if(CurrentStudent.images.length < 1) { CurrentStudent.images = ["img/thumb.jpg","img/thumb.jpg","img/thumb.jpg","img/thumb.jpg"] }
+        var gridsNeeded = Math.ceil((CurrentStudent.images.length / 3));
+
+        var grids = ['a','b','c','d','e'];
+        var incGrid = 0;
+        if(gridsNeeded < 6) {
+            var cGrid = $("#StudentImages");
+            for(var i=0; i<CurrentStudent.images.length; i++) {
+
+                var a = $('(<a href="" style="float:left; margin-left:17px; width:60px; height:25px" data-direction="reverse" data-role="button" data-theme="f" data-corners="true" data-shadow="true" data-iconshadow="true" data-wrapperels="span" class="ui-btn ui-shadow ui-btn-corner-all ui-btn-up-f"></a>');
+                var spanP = $('<span style="padding-bottom:0px; padding-top:0px; padding-left:0px; padding-right:0px; width:60px; height:25px" class="ui-btn-inner ui-btn-corner-all"></span>');
+                var spanC = $('<span style="width:40px; height:25px; font-size: 10px" class="ui-btn-text">Remove</span>');
+
+                $(spanP).append(spanC);
+                $(a).append(spanP);
+
+                if(i%3 == 0 && i != 0) {
+                    incGrid++;
+                }
+
+                if(incGrid == 0) {
+                    if(i == 0) {
+                        var li = $("<div class='ui-block-a' style='float:left'><div class='ui-bar ui-bar-b' style='height:50px; width:65px;'><img width='65' height='50' src="+ CurrentStudent.images[i]+" /></div> </div>");
+                        li[0].setAttribute('number',i);
+
+                        $(cGrid).append($(li));
+                        $(li).append(a);
+                        $(a).click(this.create({image:CurrentStudent.images[i], index:i},RemoveImage));
+                    }
+
+                    if(i == 1) {
+                        var li = $("<div class='ui-block-b'><div class='ui-bar ui-bar-b' style='height:50px; width:65px;'><img width='65' height='50' src="+ CurrentStudent.images[i]+" /></div> </div>");
+                        li[0].setAttribute('number',i);
+
+                        $(cGrid).append($(li));
+                        $(li).append(a);
+                        $(a).click(this.create({image:CurrentStudent.images[i], index:i},RemoveImage));
+                    }
+                    if(i == 2) {
+                        var li = $("<div class='ui-block-c'><div class='ui-bar ui-bar-b' style='height:50px; width:65px;'><img width='65' height='50' src="+ CurrentStudent.images[i]+" /></div> </div>");
+                        li[0].setAttribute('number',i);
+
+                        $(cGrid).append($(li));
+                        $(li).append(a);
+                        $(a).click(this.create({image:CurrentStudent.images[i], index:i},RemoveImage));
+                    }
+                }
+
+                if(incGrid == 1) {
+                    if(i == 3) {
+                        var li = $("<div class='ui-block-a'><div class='ui-bar ui-bar-b' style='height:50px; width:65px;'><img width='65' height='50' src="+ CurrentStudent.images[i]+" /></div> </div>");
+                        li[0].setAttribute('number',i);
+
+                        $(cGrid).append($(li));
+                        $(li).append(a);
+                        $(a).click(this.create({image:CurrentStudent.images[i], index:i},RemoveImage));
+                    }
+
+                    if(i == 4) {
+                        var li = $("<div class='ui-block-b'><div class='ui-bar ui-bar-b' style='height:50px; width:65px;'><img width='65' height='50' src="+ CurrentStudent.images[i]+" /></div> </div>");
+                        li[0].setAttribute('number',i);
+
+                        $(cGrid).append($(li));
+                        $(li).append(a);
+                        $(a).click(this.create({image:CurrentStudent.images[i], index:i},RemoveImage));
+                    }
+                    if(i == 5) {
+                        var li = $("<div class='ui-block-c'><div class='ui-bar ui-bar-b' style='height:50px; width:65px;'><img width='65' height='50' src="+ CurrentStudent.images[i]+" /></div> </div>");
+                        li[0].setAttribute('number',i);
+
+                        $(cGrid).append($(li));
+                        $(li).append(a);
+                        $(a).click(this.create({image:CurrentStudent.images[i], index:i},RemoveImage));
+                    }
+
+                }
+
+                if(incGrid == 2) {
+
+                    if(i == 6) {
+                        var li = $("<div class='ui-block-a'><div class='ui-bar ui-bar-b' style='height:50px; width:65px;'><img width='65' height='50' src="+ CurrentStudent.images[i]+" /></div> </div>");
+                        li[0].setAttribute('number',i);
+
+                        $(cGrid).append($(li));
+                        $(li).append(a);
+                        $(a).click(this.create({image:CurrentStudent.images[i], index:i},RemoveImage));
+                    }
+
+                    if(i == 7) {
+                        var li = $("<div class='ui-block-b'><div class='ui-bar ui-bar-b' style='height:50px; width:65px;'><img width='65' height='50' src="+ CurrentStudent.images[i]+" /></div> </div>");
+                        li[0].setAttribute('number',i);
+
+                        $(cGrid).append($(li));
+                        $(li).append(a);
+                        $(a).click(this.create({image:CurrentStudent.images[i], index:i},RemoveImage));
+                    }
+                    if(i == 8) {
+                        var li = $("<div class='ui-block-c'><div class='ui-bar ui-bar-b' style='height:50px; width:65px;'><img width='65' height='50' src="+ CurrentStudent.images[i]+" /></div> </div>");
+                        li[0].setAttribute('number',i);
+
+                        $(cGrid).append($(li));
+                        $(li).append(a);
+                        $(a).click(this.create({image:CurrentStudent.images[i], index:i},RemoveImage));
+                    }
+
+                }
+
+                if(incGrid == 3) {
+
+                    if(i == 9) {
+                        var li = $("<div class='ui-block-a'><div class='ui-bar ui-bar-b' style='height:50px; width:65px;'><img width='65' height='50' src="+ CurrentStudent.images[i]+" /></div> </div>");
+                        li[0].setAttribute('number',i);
+
+                        $(cGrid).append($(li));
+                        $(li).append(a);
+                        $(a).click(this.create({image:CurrentStudent.images[i], index:i},RemoveImage));
+                    }
+
+                    if(i == 10) {
+                        var li = $("<div class='ui-block-b'><div class='ui-bar ui-bar-b' style='height:50px; width:65px;'><img width='65' height='50' src="+ CurrentStudent.images[i]+" /></div> </div>");
+                        li[0].setAttribute('number',i);
+
+                        $(cGrid).append($(li));
+                        $(li).append(a);
+                        $(a).click(this.create({image:CurrentStudent.images[i], index:i},RemoveImage));
+                    }
+                    if(i == 11) {
+                        var li = $("<div class='ui-block-c'><div class='ui-bar ui-bar-b' style='height:50px; width:65px;'><img width='65' height='50' src="+ CurrentStudent.images[i]+" /></div> </div>");
+                        li[0].setAttribute('number',i);
+
+                        $(cGrid).append($(li));
+                        $(li).append(a);
+                        $(a).click(this.create({image:CurrentStudent.images[i], index:i},RemoveImage));
+                    }
+
+                }
+                if(incGrid == 4) {
+
+                    if(i == 12) {
+                        var li = $("<div class='ui-block-a'><div class='ui-bar ui-bar-b' style='height:50px; width:65px;'><img width='65' height='50' src="+ CurrentStudent.images[i]+" /></div> </div>");
+                        li[0].setAttribute('number',i);
+
+                        $(cGrid).append($(li));
+                        $(li).append(a);
+                        $(a).click(this.create({image:CurrentStudent.images[i], index:i},RemoveImage));
+                    }
+
+                    if(i == 13) {
+                        var li = $("<div class='ui-block-b'><div class='ui-bar ui-bar-b' style='height:50px; width:65px;'><img width='65' height='50' src="+ CurrentStudent.images[i]+" /></div> </div>");
+                        li[0].setAttribute('number',i);
+
+                        $(cGrid).append($(li));
+                        $(li).append(a);
+                        $(a).click(this.create({image:CurrentStudent.images[i], index:i},RemoveImage));
+                    }
+                    if(i == 14) {
+                        var li = $("<div class='ui-block-c'><div class='ui-bar ui-bar-b' style='height:50px; width:65px;'><img width='65' height='50' src="+ CurrentStudent.images[i]+" /></div> </div>");
+                        li[0].setAttribute('number',i);
+
+                        $(cGrid).append($(li));
+                        $(li).append(a);
+                        $(a).click(this.create({image:CurrentStudent.images[i], index:i},RemoveImage));
+                    }
+
+                }
+                if(incGrid == 5) {
+
+                    if(i == 15) {
+                        var li = $("<div class='ui-block-a'><div class='ui-bar ui-bar-b' style='height:50px; width:65px;'><img width='65' height='50' src="+ CurrentStudent.images[i]+" /></div> </div>");
+                        li[0].setAttribute('number',i);
+
+                        $(cGrid).append($(li));
+                        $(li).append(a);
+                        $(a).click(this.create({image:CurrentStudent.images[i], index:i},RemoveImage));
+                    }
+
+                    if(i == 16) {
+                        var li = $("<div class='ui-block-b'><div class='ui-bar ui-bar-b' style='height:50px; width:65px;'><img width='65' height='50' src="+ CurrentStudent.images[i]+" /></div> </div>");
+                        li[0].setAttribute('number',i);
+
+                        $(cGrid).append($(li));
+                        $(li).append(a);
+                        $(a).click(this.create({image:CurrentStudent.images[i], index:i},RemoveImage));
+                    }
+                    if(i == 17) {
+                        var li = $("<div class='ui-block-c'><div class='ui-bar ui-bar-b' style='height:50px; width:65px;'><img width='65' height='50' src="+ CurrentStudent.images[i]+" /></div> </div>");
+                        li[0].setAttribute('number',i);
+
+                        $(cGrid).append($(li));
+                        $(li).append(a);
+                        $(a).click(this.create({image:CurrentStudent.images[i], index:i},RemoveImage));
+                    }
+
+                }
+            }
+        }
+        else {
+            navigator.notification.alert(
+                    'Maximum number of images for student exceeded',  // message
+                    function() {},         // callback
+                    'Maximum Images',            // title
+                    'Close'                  // buttonName
+            );
+            //alert("Maximum number of images for student exceeded");
+        }
+    }
+}
+
+function GenerateNotes() {
+    if(CurrentStudent.name != "No Student Selected") {
+        var nList = $("#noteslist");
+        for(var i=0; i<CurrentStudent.notes.length; i++) {
+            if(i == 0) { var li = $("<li style='text-align:center; cursor:pointer; border:1px solid #AAA /*{c-body-border}*/' data-theme='c' class='ui-li ui-li-static ui-body-c'>" + CurrentStudent.notes[i] + "</li>"); }
+            else { var li = $("<li style='text-align:center; cursor:pointer; border-left:1px solid #AAA; border-right:1px solid #AAA' data-theme='c' class='ui-li ui-li-static ui-body-c'>" + CurrentStudent.notes[i] + "</li>"); }
+
+            var ci = i;
+            li[0].setAttribute('number',i);
+            li[0].onclick = create({note: CurrentStudent.notes[i], index: i}, LoadEditNote);
+            $(nList).append(li);
+        }
+    }
+}
+
+function UpdateTeacherEmail() {
+
+    var teacherEmail = $('#Tinput').val();
+
+    if(teacherEmail != '' && teacherEmail != undefined && validateEmail(teacherEmail)) {
+        CallbackData = teacherEmail;
+        AddTeacherEmail(teacherEmail);
+    }
+    else {
+
+        navigator.notification.alert(
+                'You must enter an email for the teacher',  // message
+                function() {},         // callback
+                'Teacher Email',            // title
+                'Close'                  // buttonName
+        );
+
+        //alert("You must enter an email for the teacher");
+    }
+
+}
+
+function AddStudent() {
+    var newStudent = $('#Sinput').val();
+    var email = $('#Einput').val();
+    if(newStudent != "") {
+        CallbackData = [newStudent,email];
+        AddValueToDB(newStudent, "","",email);
+    }
+    else {
+        navigator.notification.alert(
+                'You must enter a name for the student',  // message
+                function() {},         // callback
+                'Student Name Invalid',            // title
+                'Close'                  // buttonName
+        );
+        //alert("You must enter a name for the student");
+    }
+
+    newStudent = $('#Sinput').val("");
+    email = $('#Einput').val("");
+}
+
+function UpdateEmail() {
+    var email = $('#UEinput').val();
+    if(email != "") {
+        CallbackData = email;
+        UpdateStudentParentEmail(email, CurrentStudent.name);
+    }
+    else {
+        navigator.notification.alert(
+                'You must input an email address',  // message
+                function() {},         // callback
+                'Invalid Email Address',            // title
+                'Close'                  // buttonName
+        );
+        //alert("You must input an email address");
+    }
+}
+
+
+function EditStudent(e) {
+    var array_index = e.target.getAttribute("number");
+    CurrentStudent = Students[array_index];
+    Application.UpdateStudentsImages();
+    Application.UpdateStudentNotes();
+    location.href="#four";
+
+}
+
+/*
+ Camera Functionality
+ - Init - Setup current student to prep for camera
+ - Start Camera loads camera
+ - onSuccess saves
+ - OnFailure lets you know fail
+ */
+
+function InitNotes(e) {
+    var array_index = e.target.getAttribute("number");
+    CurrentStudent = Students[array_index];
+    location.href="#writenote";
+}
+
+function submitNote() {
+    var Note = $('#textarea-a').val();
+    Note = Note.trim();
+    if(Note != "") {
+        CallbackData = Note;
+        var arr = CurrentStudent.notes.slice(0);
+        arr.push(Note);
+        UpdateStudentNotesInDB(CurrentStudent.name, PrepDBData(CurrentStudent.images), PrepDBData(arr));
+    }
+}
+
+function InitCamera(e) {
+    var array_index = e.target.getAttribute("number");
+    CurrentStudent = Students[array_index];
+    StartCamera();
+}
+
+function StartCamera() {
+    if(ReportImages.length < 3) {
+        if(navigator.camera){
+            //navigator.camera.getPicture(onSuccess, onFail, { quality: 50, correctOrientation: true, destinationType: Camera.DestinationType.FILE_URI });
+            navigator.camera.getPicture(onSuccess, onFail, { quality: 50, correctOrientation: true, destinationType: navigator.camera.DestinationType.FILE_URI, sourceType: navigator.camera.PictureSourceType.PHOTOLIBRARY});
+        }
+    }
+}
+
+function onSuccess(imageURI) {
+    //CallbackData = imageURI;
+    //var arr = CurrentStudent.images.slice(0);
+    //arr.push(imageURI);
+    //UpdateStudentImagesInDB(CurrentStudent.name, PrepDBData(arr), PrepDBData(CurrentStudent.notes));
+
+    //Store File URI & Append...
+    ReportImages.push(imageURI);
+
+    //Rebuild...
+    ResetImages();
+}
+
+function removeImage(index) {
+
+    if(index == 0) { $('#image_one').text('No Photo')}
+
+    if(index == 1) {$('#image_two').text('No Photo')}
+
+    if(index == 2) {$('#image_three').text('No Photo')}
+
+    //Fix array...
+    if(ReportImages[index]) {
+        ReportImages.splice(index, 1);
+    }
+    if(ReportImages[index]) {
+        ReportCaptions.splice(index,1);
+    }
+
+    ResetImages();
+
+    setTimeout(function() { $.unblockUI(); }, 200);
+
+}
+
+function ResetImages() {
+    //Set all to No Photo attached...
+    $('#image_one').text('No Photo');
+    $('#image_two').text('No Photo');
+    $('#image_three').text('No Photo');
+
+    //Rebuild...
+    for(var i=0;i< ReportImages.length;i++) {
+            if(i==0) {
+                $('#image_one').text('Photo One');
+            }
+            if(i==1) {
+                $('#image_two').text('Photo Two');
+            }
+            if(i==2) {
+                $('#image_three').text('Photo Three');
+            }
+    }
+}
+
+function onFail(message) {
+    //Nothing to do atm...
+}
+
+function onTermSelection(term) {
+    ReportTerm = term;
+    $('#choosetermlist').empty();
+    $('#choosetermlist').append('<li data-theme="e" style="text-align:center;background-image:none; text-shadow:none; background-color:#9FADBF;" class="ui-li ui-li-static ui-body-e"> My Children </li>');
+    GenerateChooseTermList();
+}
+
+function GenerateChooseTermList() {
+    if(ReportTerm) {
+        for(var i=0; i<Students.length; i++) {
+            if (Students[i][ReportTerm] == 0 || ReportTerm == "Other" ) {
+                var li = $('<li style="text-align:center; background-image:none; text-shadow:none; color:#f5f5f5; cursor:pointer;border-left:1px solid #AAA; border-right:1px solid #AAA; border-bottom:1px solid #AAA; background-color:#F62817;margin-top:10px;" class="ui-li ui-li-static">' + Students[i].name + '</li>');
+            }
+            else {
+                var li = $('<li style="text-align:center; background-image:none; text-shadow:none; color:#f5f5f5; cursor:pointer;border-left:1px solid #AAA; border-right:1px solid #AAA; border-bottom:1px solid #AAA; background-color:#52D017;margin-top:10px;" class="ui-li ui-li-static">' + Students[i].name + '</li>');
+
+            }
+            $(li)[0].onclick = onChooseTermListStudentClick;
+            $(li)[0].setAttribute("number",i);
+            $('#choosetermlist').append(li);
+
+        }
+    }
+}
+
+function onChooseTermListStudentClick(e) {
+    var array_index = e.target.getAttribute("number");
+    CurrentStudent = Students[array_index];
+    Application.UpdateStudentsImages();
+    Application.UpdateStudentNotes();
+
+    //Clear Everything ye ye
+    //Set Email Values
+    $("#eInputReport").val(CurrentStudent.Parent);
+    $("#TRinput").val(Globals.teacher);
+
+    //Set Title
+    $("#ReportTitle").val(CurrentStudent.name + "'s Learning Story");
+
+    //Set Date
+    var today = new Date();
+    var dd = today.getDate();
+    var mm = today.getMonth()+1;
+    var yyyy = today.getFullYear();
+    if(dd<10){dd='0'+dd}
+    if(mm<10){mm='0'+mm}
+    today = dd +'/'+mm+'/'+yyyy;
+    $("#ReportDate").val(today);
+
+    //Restore Style Defaults
+    SelectedBackground = "E";
+    SelectedFont = "C";
+    SelectedFontColour = "A";
+
+    //Clear Evaluation & Followup
+    $("#followuptext").val("");
+    $("#evaluationtext").val("");
+
+    //Clear Principles & Practices
+    if($("input[type='checkbox']").attr("checked",false)[0].parentNode.className != "") {
+        $("input[type='checkbox']").attr("checked",false).checkboxradio("refresh");
+    }
+    SelectedPractices = [];
+    SelectedPrinciples = [];
+
+    //Clear Outcomes
+    ReportOutcomes = [];
+
+    //Clear Notes
+    ReportCheckBoxesNotes = [];
+    ReportCaptions = [];
+    $('#ReportNotes').empty();
+    GenerateReportNotes();
+
+    //Clear Images
+    ReportCheckBoxesCaption = [];
+    ReportCheckBoxesImages = [];
+    ReportImages = [];
+    //$('#ReportImages').empty();
+    //GenerateReportImageGrid();
+    ResetImages();
+
+    location.href = "#ChooseTemplate";
+}
+
+function onTemplateClick(template) {
+
+    $.blockUI({ message: '<h4><img src="./img/busy.gif" /> Loading Report Form...</h4>' });
+
+    if(template == 'A') { Template = TemplateOne; ReportTemplate = "A"; }
+    if(template == 'B') { Template = TemplateTwo; ReportTemplate = "B";}
+    if(template == 'C') { Template = TemplateThree; ReportTemplate = "C";}
+    if(template == 'D') { Template = TemplateFour; ReportTemplate = "D"; }
+
+    location.href = "#ReportFill"
+}
+
+function saveCaption (none) {
+
+    CaptionLoading = false;
+/*
+    if(none) { ReportCheckBoxesCaption.push("");}
+    else {
+        var text = $(document.getElementById('captiontext')).val();
+        CurrentCaptionElement.setAttribute("caption",text);
+        ReportCheckBoxesCaption.push(text);
+        $(document.getElementById('captiontext')).val('');
+    }
+*/
+   CaptionLoading = false;
+
+    if(none) { ReportCheckBoxesCaption[caption] = "";}
+    else {
+        var text = $(document.getElementById('captiontext')).val();
+        ReportCaptions[caption] = text;
+        $(document.getElementById('captiontext')).val('');
+    }
+}
+function setCaptionElement (el) {
+    CurrentCaptionElement = el;
+}
+
+function GenerateReportImageGrid() {
+    if(CurrentStudent.name != "No Student Selected") {
+        var gridsNeeded = Math.ceil((CurrentStudent.images.length / 3));
+
+        var grids = ['a','b','c','d','e'];
+        var incGrid = 0;
+        if(gridsNeeded < 6) {
+            var cGrid = $("#ReportImages");
+            ReportCheckBoxesImages = [];
+            for(var i=0; i<CurrentStudent.images.length; i++) {
+
+                var divContainer = $('<div class="ui-checkbox" style="width:60px; margin-left:17px"></div>');
+                var labelContainer = $('<label data-corners="true" data-shadow="false" data-iconshadow="true" data-wrapperels="span" data-icon="checkbox-off" data-theme="c" class="ui-btn ui-btn-corner-all ui-btn-icon-left ui-checkbox-off ui-btn-up-c"></label>');
+                $(divContainer).append(labelContainer);
+
+                var spanC = $('<span class="ui-btn-inner ui-btn-corner-all"> </span>');
+                var spanChildB = $(' <span class="ui-icon ui-icon-checkbox-off ui-icon-shadow" style="margin-left:5px">&nbsp;</span>');
+
+                $(labelContainer).append(spanC);
+                $(spanC).append(spanChildB);
+
+                //ReportCheckBoxesImages.push($(input).children()[0]);
+                //$($(input).children()[0]).change(onChangeImageChange);
+
+                if(i%3 == 0 && i != 0) {
+                    incGrid++;
+                }
+
+                if(incGrid == 0) {
+
+                    if(i == 0) {
+                        var li = $("<div id='ListImage' class='ui-block-a'><div class='ui-bar ui-bar-b' style='height:100px; width:65px;'><img width='65' height='100' src="+ CurrentStudent.images[i]+" /></div> </div>");
+                        li[0].setAttribute('number',i);
+                    }
+
+                    if(i == 1) {
+                        var li = $("<div id='ListImage' class='ui-block-b'><div class='ui-bar ui-bar-b' style='height:100px; width:65px;'><img width='65' height='100' src="+ CurrentStudent.images[i]+" /></div> </div>");
+                        li[0].setAttribute('number',i);
+                    }
+                    if(i == 2) {
+                        var li = $("<div id='ListImage' class='ui-block-c'><div class='ui-bar ui-bar-b' style='height:100px; width:65px;'><img width='65' height='100' src="+ CurrentStudent.images[i]+" /></div> </div>");
+                        li[0].setAttribute('number',i);
+                    }
+                }
+
+                if(incGrid == 1) {
+
+                    if(i == 3) {
+                        var li = $("<div id='ListImage' class='ui-block-a'><div class='ui-bar ui-bar-b' style='height:100px; width:65px;'><img width='65' height='100' src="+ CurrentStudent.images[i]+" /></div> </div>");
+                        li[0].setAttribute('number',i);
+
+                    }
+
+                    if(i == 4) {
+
+                        var li = $("<div id='ListImage' class='ui-block-b'><div class='ui-bar ui-bar-b' style='height:100px; width:65px;'><img width='65' height='100' src="+ CurrentStudent.images[i]+" /></div> </div>");
+                        li[0].setAttribute('number',i);
+                    }
+                    if(i == 5) {
+
+                        var li = $("<div id='ListImage' class='ui-block-c'><div class='ui-bar ui-bar-b' style='height:100px; width:65px;'><img width='65' height='100' src="+ CurrentStudent.images[i]+" /></div> </div>");
+                        li[0].setAttribute('number',i);
+                    }
+
+                }
+
+                if(incGrid == 2) {
+
+                    if(i == 6) {
+                        var li = $("<div id='ListImage' class='ui-block-a'><div class='ui-bar ui-bar-b' style='height:100px; width:65px;'><img width='65' height='100' src="+ CurrentStudent.images[i]+" /></div> </div>");
+                        li[0].setAttribute('number',i);
+
+                    }
+
+                    if(i == 7) {
+                        var li = $("<div id='ListImage' class='ui-block-b'><div class='ui-bar ui-bar-b' style='height:100px; width:65px;'><img width='65' height='100' src="+ CurrentStudent.images[i]+" /></div> </div>");
+                        li[0].setAttribute('number',i);
+                    }
+                    if(i == 8) {
+                        var li = $("<div id='ListImage' class='ui-block-c'><div class='ui-bar ui-bar-b' style='height:100px; width:65px;'><img width='65' height='100' src="+ CurrentStudent.images[i]+" /></div> </div>");
+                        li[0].setAttribute('number',i);
+                    }
+
+                }
+
+                if(incGrid == 3) {
+
+                    if(i == 9) {
+                        var li = $("<div id='ListImage' class='ui-block-a'><div class='ui-bar ui-bar-b' style='height:100px; width:65px;'><img width='65' height='100' src="+ CurrentStudent.images[i]+" /></div> </div>");
+                        li[0].setAttribute('number',i);
+                    }
+
+                    if(i == 10) {
+                        var li = $("<div id='ListImage' class='ui-block-b'><div class='ui-bar ui-bar-b' style='height:100px; width:65px;'><img width='65' height='100' src="+ CurrentStudent.images[i]+" /></div> </div>");
+                        li[0].setAttribute('number',i);
+                    }
+                    if(i == 11) {
+                        var li = $("<div id='ListImage' class='ui-block-c'><div class='ui-bar ui-bar-b' style='height:100px; width:65px;'><img width='65' height='100' src="+ CurrentStudent.images[i]+" /></div> </div>");
+                        li[0].setAttribute('number',i);
+                    }
+
+                }
+                if(incGrid == 4) {
+
+                    if(i == 12) {
+                        var li = $("<div id='ListImage' class='ui-block-a'><div class='ui-bar ui-bar-b' style='height:100px; width:65px;'><img width='65' height='100' src="+ CurrentStudent.images[i]+" /></div> </div>");
+                        li[0].setAttribute('number',i);
+                    }
+
+                    if(i == 13) {
+                        var li = $("<div id='ListImage' class='ui-block-b'><div class='ui-bar ui-bar-b' style='height:100px; width:65px;'><img width='65' height='100' src="+ CurrentStudent.images[i]+" /></div> </div>");
+                        li[0].setAttribute('number',i);
+                    }
+                    if(i == 14) {
+                        var li = $("<div id='ListImage' class='ui-block-c'><div class='ui-bar ui-bar-b' style='height:100px; width:65px;'><img width='65' height='100' src="+ CurrentStudent.images[i]+" /></div> </div>");
+                        li[0].setAttribute('number',i);
+                    }
+
+                }
+                if(incGrid == 5) {
+
+                    if(i == 15) {
+                        var li = $("<div id='ListImage' class='ui-block-a'><div class='ui-bar ui-bar-b' style='height:100px; width:65px;'><img width='65' height='100' src="+ CurrentStudent.images[i]+" /></div> </div>");
+                        li[0].setAttribute('number',i);
+
+                    }
+
+                    if(i == 16) {
+                        var li = $("<div id='ListImage' class='ui-block-b'><div class='ui-bar ui-bar-b' style='height:100px; width:65px;'><img width='65' height='100' src="+ CurrentStudent.images[i]+" /></div> </div>");
+                        li[0].setAttribute('number',i);
+                    }
+                    if(i == 17) {
+                        var li = $("<div id='ListImage' class='ui-block-c'><div class='ui-bar ui-bar-b' style='height:100px; width:65px;'><img width='65' height='100' src="+ CurrentStudent.images[i]+" /></div> </div>");
+                        li[0].setAttribute('number',i);
+                    }
+                }
+
+                $(li).append(divContainer);
+                $(cGrid).append(li);
+
+                li[0].setAttribute("checked","false");
+                li[0].setAttribute("link", CurrentStudent.images[i]);
+                li[0].setAttribute("caption","");
+                $(li).click(this.create({li: li[0],x:spanChildB, y:labelContainer, image:CurrentStudent.images[i]},onImagesCheckboxClick));
+                $(li[0]).bind('click', function(event) { event.stopPropagation(); setCaptionElement(this); });
+
+            }
+        }
+        else {
+            navigator.notification.alert(
+                    'Maximum number of images for student reached.',  // message
+                    function() {},         // callback
+                    'Maximum Student Images Reached',            // title
+                    'Close'                  // buttonName
+            );
+            //alert("Maximum number of images for student exceeded");
+        }
+    }
+}
+
+function onImagesCheckboxClick(e) {
+
+    if(CaptionLoading == false) {
+
+        loadingMessage("Loading...");
+
+        var isChecked = this.li.getAttribute("checked");
+
+        if(isChecked == "true") {
+
+            $(this.x).removeClass('ui-icon-checkbox-on');
+            $(this.y).removeClass('ui-checkbox-on');
+            $(this.x).addClass('ui-icon-checkbox-off');
+            $(this.y).addClass('ui-checkbox-off');
+            this.li.setAttribute("checked","false");
+
+            //var index = ReportCheckBoxesImages.indexOf(this.image);
+            //ReportCheckBoxesImages.splice(index, 1);
+            //ReportCheckBoxesCaption.splice(index, 1);
+
+
+            //Rebuild Captions array...
+            var listImages = $("div[id^='ListImage']");
+
+            ReportCheckBoxesImages = [];
+            ReportCheckBoxesCaption = [];
+
+            for(var i = 0; i<listImages.length; i++) {
+                if(listImages[i].getAttribute("checked") == "true") {
+                    ReportCheckBoxesImages.push(listImages[i].getAttribute("link"));
+                    ReportCheckBoxesCaption.push(listImages[i].getAttribute("caption"));
+                }
+            }
+            uploadPhotoCB();
+
+        }
+        else {
+            if(ReportCheckBoxesImages.length < Template.images) {
+
+                CaptionLoading = true;
+
+                $(this.x).removeClass('ui-icon-checkbox-off');
+                $(this.y).removeClass('ui-checkbox-off');
+                $(this.x).addClass('ui-icon-checkbox-on');
+                $(this.y).addClass('ui-checkbox-on');
+                this.li.setAttribute("checked","true");
+
+                ReportCheckBoxesImages.push(this.image);
+                location.href = "#addcaption";
+
+                uploadPhotoCB();
+            }
+        }
+
+    }
+}
+
+function alignImagesCaptions() {
+    //Rebuild Captions array...
+    var listImages = $("div[id^='ListImage']");
+
+    ReportCheckBoxesImages = [];
+    ReportCheckBoxesCaption = [];
+
+    for(var i = 0; i<listImages.length; i++) {
+        if(listImages[i].getAttribute("checked") == "true") {
+            ReportCheckBoxesImages.push(listImages[i].getAttribute("link"));
+            ReportCheckBoxesCaption.push(listImages[i].getAttribute("caption"));
+        }
+    }
+}
+
+function GenerateReportNotes() {
+    if(CurrentStudent.name != "No Student Selected") {
+        ReportCheckBoxesNotes = [];
+        var nList = $("#ReportNotes");
+        for(var i=0; i<CurrentStudent.notes.length; i++) {
+
+            var divContainer = $('<div class="ui-checkbox"></div>');
+            var labelContainer = $('<label data-corners="true" data-shadow="false" data-iconshadow="true" data-wrapperels="span" data-icon="checkbox-off" data-theme="c" class="ui-btn ui-btn-corner-all ui-btn-icon-left ui-checkbox-off ui-btn-up-c"></label>');
+            //var input = $('<input type="checkbox" name="outcome" id="outcome">');
+            $(divContainer).append(labelContainer);
+
+            var spanC = $('<span class="ui-btn-inner ui-btn-corner-all"> </span>');
+            var spanChildA = $(' <span class="ui-btn-text">'+ CurrentStudent.notes[i] +' </span>');
+            var spanChildB = $(' <span class="ui-icon ui-icon-checkbox-off ui-icon-shadow">&nbsp;</span>');
+
+            $(labelContainer).append(spanC);
+            $(spanC).append(spanChildA,spanChildB);
+
+            var li = $('<li style="text-align:center;cursor:pointer; background-image:none; background:none;border:0px; margin-bottom:0px; margin-top:0px; padding-top:0px; padding-bottom:0px" data-theme="c" class="ui-li ui-li-static ui-body-c"></li>');
+            $(li).append(divContainer);
+
+            li[0].setAttribute("checked","false");
+            $(li).click(this.create({li: li[0],x:spanChildB, y:labelContainer, note:CurrentStudent.notes[i]},onNotesCheckboxClick));
+
+            $(nList).append(li);
+        }
+    }
+}
+
+function onNotesCheckboxClick(e) {
+    var isChecked = this.li.getAttribute("checked");
+
+    if(isChecked == "true") {
+        $(this.x).removeClass('ui-icon-checkbox-on');
+        $(this.y).removeClass('ui-checkbox-on');
+        $(this.x).addClass('ui-icon-checkbox-off');
+        $(this.y).addClass('ui-checkbox-off');
+        this.li.setAttribute("checked","false");
+
+        var index = ReportCheckBoxesNotes.indexOf(this.note);
+        ReportCheckBoxesNotes.splice(index, 1);
+    }
+    else {
+        $(this.x).removeClass('ui-icon-checkbox-off');
+        $(this.y).removeClass('ui-checkbox-off');
+        $(this.x).addClass('ui-icon-checkbox-on');
+        $(this.y).addClass('ui-checkbox-on');
+        this.li.setAttribute("checked","true");
+
+        ReportCheckBoxesNotes.push(this.note);
+
+    }
+}
+
+function onSubmitReport(test) {
+
+    if(test) {
+        isTest = true;
+    }
+
+
+    if(checkConnection() !== "No Internet Detected" && checkConnection() !== "Unknown") {
+
+        SendData = {};
+        //Get title
+        var title = $("#ReportTitle").val();
+        //Get Date
+        var date = $("#ReportDate").val();
+
+        alignImagesCaptions();
+
+        //List of images
+        var images = ReportCheckBoxesImages;
+
+        //List of image captions
+        var captions = [];
+
+        //List of notes
+        var NOTES = ReportCheckBoxesNotes;
+
+        //Get email address
+        var email = document.getElementById("eInputReport").value;
+        var other = document.getElementById("TRinput").value;
+
+        //Get follow up & evaluation if any
+        var followup = $("#followuptext").val();
+        var evaluation = $("#evaluationtext").val();
+
+        //Check title / date / email
+
+        SendData.title = title;
+        SendData.date = date;
+        SendData.images = ReportImages.length;
+        SendData.captions = ReportCaptions;
+        SendData.notes = NOTES;
+        SendData.email = email;
+        SendData.cc = other;
+        SendData.followupexperience = followup;
+        SendData.evaluation = evaluation;
+        SendData.type = ReportType;
+        SendData.imageData = ReportImages.slice(0);
+        SendData.captionData = ReportCaptions.slice(0);
+        SendData.Background = SelectedBackground;
+        SendData.Font = SelectedFont;
+        SendData.FontColour = SelectedFontColour;
+        SendData.principles = SelectedPrinciples;
+        SendData.practices = SelectedPractices;
+
+        SendData.uuid = device.uuid;
+        SendData.template = ReportTemplate;
+
+        if(isTest) {
+            SendData.email = SendData.cc;
+            SendData.cc = "";
+        }
+
+        if(SendData.email == "" || SendData.email == null || validateEmail(SendData.email) == false) {
+            navigator.notification.alert(
+                    'Must enter a valid email',  // message
+                    function() {},         // callback
+                    'Invalid Email',            // title
+                    'Close'                  // buttonName
+            );
+            //alert("Must enter a valid email");
+        }
+        else {
+            if(SendData.title == "" || SendData.title == null) {
+                navigator.notification.alert(
+                        'Must enter a title for the report',  // message
+                        function() {},         // callback
+                        'No Report Title',            // title
+                        'Close'                  // buttonName
+                );
+                //alert("Must enter a title for the report");
+            }
+            else {
+                if(SendData.date == "" || SendData.date == null) {
+                    navigator.notification.alert(
+                            'Must enter a date for the report',  // message
+                            function() {},         // callback
+                            'No Report Date',            // title
+                            'Close'                  // buttonName
+                    );
+                    //alert("Must enter a date for the report")
+                }
+                else {
+                    PrepData();
+                }
+            }
+        }
+
+    }
+
+    else {
+
+        navigator.notification.alert(
+                'No Internet Connection',  // message
+                function() {},         // callback
+                'Internet Connection Failure',            // title
+                'Close'                  // buttonName
+        );
+        //alert("No Internet Connection");
+    }
+
+
+    //Sendddd
+
+    //On call back update DB
+
+}
+
+function validateEmail(email) {
+    var re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+    return re.test(email);
+}
+
+
+/*
+ Outcome Selection Page Generation
+ */
+function GenerateOutcomesChecklist(data) {
+
+    var oList = $("#outcomelist");
+    $(oList).empty();
+    for(var i=0; i<data.length; i++) {
+
+        var divContainer = $('<div class="ui-checkbox"></div>');
+        var labelContainer = $('<label data-corners="true" data-shadow="false" data-iconshadow="true" data-wrapperels="span" data-icon="checkbox-off" data-theme="i" class="ui-btn ui-btn-corner-all ui-btn-icon-left ui-checkbox-off ui-btn-up-i"></label>');
+        //var input = $('<input type="checkbox" name="outcome" id="outcome">');
+        $(divContainer).append(labelContainer);
+
+        var spanC = $('<span class="ui-btn-inner ui-btn-corner-all"> </span>');
+        var spanChildA = $(' <span class="ui-btn-text">'+ data[i] +' </span>');
+        var spanChildB = $(' <span class="ui-icon ui-icon-checkbox-off ui-icon-shadow">&nbsp;</span>');
+
+        $(labelContainer).append(spanC);
+        $(spanC).append(spanChildA,spanChildB);
+
+        var li = $('<li style="text-align:center;cursor:pointer;" data-theme="i" class="ui-li ui-li-static ui-body-i"></li>');
+        li[0].setAttribute("checked","false");
+
+        $(li).click(this.create({li: li[0],x:spanChildB, y:labelContainer, text:spanChildA},onCheckboxClick));
+        $(li).append(divContainer);
+
+        $(oList).append(li);
+
+        checkChecked(li[0], data[i],spanChildB,labelContainer, spanChildA)
+
+    }
+}
+
+function checkChecked(el, text,x,y, spanText) {
+
+    for(var i=0; i<ReportOutcomes.length;i++) {
+        if(ReportOutcomes[i] == $(spanText).text()) {
+            $(x).removeClass('ui-icon-checkbox-off');
+            $(y).removeClass('ui-checkbox-off');
+            $(x).addClass('ui-icon-checkbox-on');
+            $(y).addClass('ui-checkbox-on');
+            el.setAttribute("checked","true");
+        }
+
+    }
+
+}
+
+function onCheckboxClick(e) {
+    var isChecked = this.li.getAttribute("checked");
+
+    if(isChecked == "true") {
+        $(this.x).removeClass('ui-icon-checkbox-on');
+        $(this.y).removeClass('ui-checkbox-on');
+        $(this.x).addClass('ui-icon-checkbox-off');
+        $(this.y).addClass('ui-checkbox-off');
+        this.li.setAttribute("checked","false");
+
+        var index = ReportOutcomes.indexOf($(this.text).text());
+        ReportOutcomes.splice(index, 1);
+    }
+    else {
+        $(this.x).removeClass('ui-icon-checkbox-off');
+        $(this.y).removeClass('ui-checkbox-off');
+        $(this.x).addClass('ui-icon-checkbox-on');
+        $(this.y).addClass('ui-checkbox-on');
+        this.li.setAttribute("checked","true");
+
+        ReportOutcomes.push($(this.text).text());
+    }
+}
+
+function ClearHistory() {
+    CallbackData = ReportTerm;
+    ClearTerms();
+
+
+}
+
+function onSelectOutcome(section,outcome) {
+    var outcomeData = data[section][outcome];
+    //Add notes?
+    if(ReportType == "" || ReportType == section) {
+        ReportType = section;
+        GenerateOutcomesChecklist(outcomeData);
+        location.href = '#OutcomeSelection';
+    }
+    else {
+        ReportOutcomes = [];
+        ReportType = section;
+        GenerateOutcomesChecklist(outcomeData);
+        location.href = '#OutcomeSelection'
+    }
+}
+
+function PrinciplesCheck(e) {
+
+    var checkboxText = $(e.target).nextAll().first().children().children()[0];
+    checkboxText = $(checkboxText).text();
+
+    if(e.target.checked) {
+        SelectedPrinciples.push(checkboxText);
+    }
+    else {
+        SelectedPrinciples.splice( $.inArray(checkboxText, SelectedPrinciples), 1 );
+    }
+}
+function PracticesCheck(e) {
+    var checkboxText = $(e.target).nextAll().first().children().children()[0];
+    checkboxText = $(checkboxText).text();
+
+    if(e.target.checked) {
+        SelectedPractices.push(checkboxText);
+    }
+    else {
+        SelectedPractices.splice( $.inArray(checkboxText, SelectedPractices), 1 );
+    }
+
+
+}
+
+</script>
+
+<script src="js/EditMethods.js"></script>
+<script src="js/RemoveMethods.js"></script>
+
+
+
+<div data-role="page" id="one" class="type-home">
+
+    <div data-role="header" data-theme="e">
+        <h1 style="white-space:normal">Early Childhood Made Easy</h1>
+    </div>
+
+    <div id="MainWindow" data-role="content">
+
+
+        <div data-role="collapsible" data-collapsed="true" data-theme = "b">
+            <h3>My Class</h3>
+            <a style="text-shadow:none;font-weight:bold" id="Edit" href="#three" data-role="button">View Children</a>
+            <a style="text-shadow:none;font-weight:bold" id="Add" href="#two" data-role="button">Add Child</a>
+            <a style="text-shadow:none;font-weight:bold" id="Remove" href="#removestudent" data-role="button">Remove Child</a>
+            <a style="text-shadow:none;font-weight:bold" id="" href="#teachersemail" data-role="button">Teacher's Email</a>
+        </div>
+
+        <div data-role="collapsible" data-collapsed = "true" data-theme = "d">
+            <h3>Capture Data</h3>
+
+            <!--<a style="text-shadow:none;font-weight:bold" id="Image" href="#captureimage" data-role="button">Capture Picture</a>-->
+            <a style="text-shadow:none;font-weight:bold" id="Notes" href="#capturenotes" data-role="button">Write Observations</a>
+
+        </div>
+
+        <div data-role="collapsible" data-collapsed = "true" data-theme = "a">
+            <h3>Create Learning Story</h3>
+
+            <a style="text-shadow:none;font-weight:bold" onclick="onTermSelection('TermOne');" href="#ChooseStudentTerm"  data-role="button">Generate Learning Story</a>
+
+        </div>
+
+        <!-- START OF POPUPS -->
+
+        <!-- INDEX POPUPS
+
+        <div data-role="popup" id="ErrorMaxImages">
+            <a href="#" data-rel="back" data-role="button" data-theme="a" data-icon="delete" data-iconpos="notext" class="ui-btn-right">Close</a>
+            Maximum number of images for student exceeded
+        </div>
+
+        <div data-role="popup" id="ErrorEmailTeacher">
+            <a href="#" data-rel="back" data-role="button" data-theme="a" data-icon="delete" data-iconpos="notext" class="ui-btn-right">Close</a>
+            You must enter an email for the teacher
+        </div>
+
+        <div data-role="popup" id="ErrorStudentName">
+            <a href="#" data-rel="back" data-role="button" data-theme="a" data-icon="delete" data-iconpos="notext" class="ui-btn-right">Close</a>
+            You must enter a name for the student
+        </div>
+
+        <div data-role="popup" id="ErrorEmailAddress">
+            <a href="#" data-rel="back" data-role="button" data-theme="a" data-icon="delete" data-iconpos="notext" class="ui-btn-right">Close</a>
+            You must input an email address
+        </div>
+
+        <div data-role="popup" id="ErrorValidEmailAddress">
+            <a href="#" data-rel="back" data-role="button" data-theme="a" data-icon="delete" data-iconpos="notext" class="ui-btn-right">Close</a>
+            Must enter a valid email
+        </div>
+
+        <div data-role="popup" id="ErrorTitle">
+            <a href="#" data-rel="back" data-role="button" data-theme="a" data-icon="delete" data-iconpos="notext" class="ui-btn-right">Close</a>
+            Must enter a title for the report
+        </div>
+
+        <div data-role="popup" id="ErrorDate">
+            <a href="#" data-rel="back" data-role="button" data-theme="a" data-icon="delete" data-iconpos="notext" class="ui-btn-right">Close</a>
+            Must enter a date for the report
+        </div>
+-->
+        <!-- DATA JS POPUPS
+
+        <div data-role="popup" id="PopReportSubmitted">
+            <a href="#" data-rel="back" data-role="button" data-theme="a" data-icon="delete" data-iconpos="notext" class="ui-btn-right">Close</a>
+            Report Submitted
+        </div>
+
+        <div data-role="popup" id="ErrorImageFail">
+            <a href="#" data-rel="back" data-role="button" data-theme="a" data-icon="delete" data-iconpos="notext" class="ui-btn-right">Close</a>
+            Image could not be uploaded. Please ensure you have an active internet connection
+        </div>
+-->
+
+        <!-- DB JS POPUPS
+
+        <div data-role="popup" id="PopChildAdd">
+            <a href="#" data-rel="back" data-role="button" data-theme="a" data-icon="delete" data-iconpos="notext" class="ui-btn-right">Close</a>
+            Child Successfully Added to Class
+        </div>
+
+        <div data-role="popup" id="PopEmailChange">
+            <a href="#" data-rel="back" data-role="button" data-theme="a" data-icon="delete" data-iconpos="notext" class="ui-btn-right">Close</a>
+            Email Address Successfully Updated
+        </div>
+
+        <div data-role="popup" id="PopTeacherEmailChange">
+            <a href="#" data-rel="back" data-role="button" data-theme="a" data-icon="delete" data-iconpos="notext" class="ui-btn-right">Close</a>
+            Teacher's Email Address Successfully Updated
+        </div>
+
+        <div data-role="popup" id="PopChildInfoUpdate">
+            <a href="#" data-rel="back" data-role="button" data-theme="a" data-icon="delete" data-iconpos="notext" class="ui-btn-right">Close</a>
+            Child Information Successfully Updated
+        </div>
+
+        <div data-role="popup" id="PopChildNotesUpdated">
+            <a href="#" data-rel="back" data-role="button" data-theme="a" data-icon="delete" data-iconpos="notext" class="ui-btn-right">Close</a>
+            Child Observations Successfully Updated
+        </div>
+-->
+
+
+    </div>
+</div>
+
+<!-- Start of second page: #two -->
+<div data-role="page" id="two">
+
+    <div data-role="header" data-theme="e">
+        <h1>Add Child</h1>
+    </div>
+
+    <div data-role="content">
+
+
+        <div class="ui-grid-solo">
+            <input id="Sinput" type="text" name="name" id="basic" value=""  placeholder="Child's Name" />
+        </div>
+
+        <div class="ui-grid-solo">
+            <input id="Einput" type="email" name="name" id="basic" value=""  placeholder="Parent's Email" />
+        </div>
+
+        <div class="ui-grid-solo" style="margin-top:30px">
+
+            <a onclick="AddStudent()" data-mini="false" data-role="button" data-icon="plus" style=""  data-theme="i">Add Child</a>
+        </div>
+
+
+        <div class="ui-grid-b" style="margin-top:30px">
+            <div class="ui-block-a"></div>
+            <div class="ui-block-b"><a href="#one" data-direction="reverse" data-role="button" data-theme="i">Back</a></div>
+        </div><!-- /grid-b -->
+
+    </div><!-- /content -->
+
+</div><!-- /page two -->
+
+<!-- Start of third page: #three -->
+<div data-role="page" id="three">
+
+    <div data-role="header" data-theme="e">
+        <h1>View Children</h1>
+    </div>
+
+    <div data-role="content">
+
+        <ul id="editlist" data-role="listview" data-theme="b" style="margin-top:10px">
+            <li data-theme="e" style="text-align:center;background-image:none; text-shadow:none; background-color:#9FADBF;"> My Children </li>
+        </ul>
+
+        <div class="ui-grid-b" style="margin-top:30px">
+            <div class="ui-block-a"></div>
+            <div class="ui-block-b"><a href="#one" data-direction="reverse" data-role="button" data-theme="i">Back</a></div>
+        </div><!-- /grid-b -->
+
+    </div><!-- /content -->
+
+
+</div><!-- /page three -->
+
+<!-- Start of fourth page (SUB PAGE OF THREE): #four -->
+<div data-role="page" id="four">
+
+    <div data-role="header" data-theme="e">
+        <h1>View Child</h1><a data-role="button" data-icon="home" data-iconpos="notext" data-theme="i" data-inline="true" href="#one" data-icon="home"></a>
+    </div>
+
+    <div id="MainWindow" data-role="content">
+
+
+
+        <div data-role="collapsible" data-collapsed="true" data-theme = "a">
+            <h3>Change Child's Name</h3>
+
+            <fieldset class="ui-grid-a">
+                <div class="ui-block-a"><input id="NewNameInput" type="text" name="name" id="basic" value=""  placeholder="Child's Name" /></div>
+                <div class="ui-block-b"> <a style="margin-top:10px" onclick="EditChangeName()" data-mini="true" data-role="button" data-icon="check" data-inline="true" data-theme="i">Confirm</a></div>
+
+            </fieldset>
+
+        </div>
+
+        <!--
+        <div data-role="collapsible" data-collapsed = "true" data-theme = "b">
+            <h3>View Child Images</h3>
+            <div id="StudentImages" class="ui-grid-b">
+            </div>
+        </div>
+        -->
+        <div data-role="collapsible" data-collapsed = "true" data-theme = "c">
+            <h3>View Child Observations</h3>
+            <ul id="noteslist" data-role="listview" data-theme="b" style="margin-bottom:5px; margin-top: 5px">
+            </ul>
+        </div>
+
+
+        <div data-role="collapsible" data-collapsed = "true" data-theme = "d">
+            <h3>Update Parent's Email</h3>
+            <fieldset class="ui-grid-a" style="">
+                <div class="ui-block-a"> <input id="UEinput" type="email" name="name" id="basic" value=""  placeholder="Parent's Email" /></div>
+                <div class="ui-block-b"> <a style="margin-top:10px" onclick="UpdateEmail()" data-mini="true" data-role="button" data-icon="check" data-inline="true" data-theme = "i">Update</a></div>
+
+            </fieldset>
+
+        </div>
+
+        <div class="ui-grid-b" style="margin-top:30px">
+            <div class="ui-block-a"></div>
+            <div class="ui-block-b"><a href="#three" data-direction="reverse" data-role="button" data-theme="i">Back</a></div>
+        </div><!-- /grid-b -->
+
+
+    </div>
+
+
+</div>
+
+<!-- Start of third page: #RemoveStudent -->
+<div data-role="page" id="removestudent">
+
+    <div data-role="header" data-theme="e">
+        <h1>Remove Child</h1>
+    </div>
+
+    <div data-role="content">
+
+
+        <ul id="deletelist" data-role="listview" data-theme="b" style="margin-top:10px">
+            <li data-theme="e" style="text-align:center;background-image:none; text-shadow:none; background-color:#9FADBF;"> My Children </li>
+        </ul>
+
+        <div class="ui-grid-b" style="margin-top:30px">
+            <div class="ui-block-a"></div>
+            <div class="ui-block-b"><a href="#one" data-direction="reverse" data-role="button" data-theme="i">Back</a></div>
+        </div><!-- /grid-b -->
+
+    </div><!-- /content -->
+
+
+</div><!-- /page RemoveStudent -->
+
+<!-- Start of Fourth page: #Teacher's Email -->
+<div data-role="page" id="teachersemail">
+
+    <div data-role="header" data-theme="e">
+        <h1>Teacher's Email</h1>
+    </div>
+
+    <div data-role="content">
+
+
+        <fieldset class="ui-grid-a" style="">
+            <div class="ui-block-a"> <input id="Tinput" type="email" name="name" id="basic" value=""  placeholder="Teacher's Email" /></div>
+            <div class="ui-block-b"> <a style="margin-top:10px" onclick="UpdateTeacherEmail()" data-theme="i" data-mini="true" data-role="button" data-icon="check" data-inline="true">Update</a></div>
+        </fieldset>
+
+        <div class="ui-grid-b" style="margin-top:30px">
+            <div class="ui-block-a"></div>
+            <div class="ui-block-b"><a href="#one" data-direction="reverse" data-role="button" data-theme="i">Back</a></div>
+        </div><!-- /grid-b -->
+
+    </div><!-- /content -->
+
+
+</div><!-- /page RemoveStudent -->
+
+<!-- Start of third page: #CaptureImageALT -->
+<div data-role="page" id="captureimageALT">
+
+    <div data-role="header" data-theme="c">
+        <h1>Select Images</h1>
+    </div>
+
+    <div data-role="content">
+
+        <input name="filesToUpload[]" id="filesToUpload" type="file" multiple="" />
+
+        <div class="ui-grid-b" style="margin-top:30px">
+            <div class="ui-block-a"></div>
+            <div class="ui-block-b"><a href="#captureimage" data-direction="reverse" data-role="button" data-theme="i">Back</a></div>
+        </div><!-- /grid-b -->
+
+    </div><!-- /content -->
+
+
+</div><!-- /page captureimage -->
+
+<div data-role="page" id="captureimage">
+
+    <div data-role="header" data-theme="e">
+        <h1 style="white-space: normal">Capture Image For</h1>
+    </div>
+
+    <div data-role="content">
+
+        <ul id="captureimagelist" data-role="listview" data-theme="b" style="margin-top:10px">
+            <li data-theme="e" style="text-align:center;background-image:none; text-shadow:none; background-color:#9FADBF;"> My Children </li>
+        </ul>
+
+        <div class="ui-grid-b" style="margin-top:30px">
+            <div class="ui-block-a"></div>
+            <div class="ui-block-b"><a href="#one" data-direction="reverse" data-role="button" data-theme="i">Back</a></div>
+        </div><!-- /grid-b -->
+
+    </div><!-- /content -->
+
+
+</div><!-- /page captureimage -->
+
+<!-- Start of third page: #RecieveNotesFromUser -->
+<div data-role="page" id="capturenotes">
+
+    <div data-role="header" data-theme="e">
+        <h1>Child Observing</h1>
+    </div>
+
+    <div data-role="content">
+
+        <ul id="capturenotelist" data-role="listview" data-theme="b" style="margin-top:10px">
+            <li data-theme="e" style="text-align:center;background-image:none; text-shadow:none; background-color:#9FADBF;"> My Children </li>
+        </ul>
+
+        <div class="ui-grid-b" style="margin-top:30px">
+            <div class="ui-block-a"></div>
+            <div class="ui-block-b"><a href="#one" data-direction="reverse" data-role="button" data-theme="i">Back</a></div>
+        </div><!-- /grid-b -->
+
+    </div><!-- /content -->
+
+
+</div><!-- /page captureimage -->
+
+<!-- Start of third page: #RecieveNotesFromUser -->
+<div data-role="page" id="writenote">
+
+    <div data-role="header" data-theme="e">
+        <h1>Compose Note</h1>
+    </div>
+
+    <div data-role="content" >
+
+        <div class="ui-grid-solo">
+            <label for="textarea-a"></label>
+            <textarea name="textarea" id="textarea-a"></textarea>
+        </div>
+
+        <div class="ui-grid-a" style="margin-top:30px">
+
+            <div class="ui-block-a"><a onclick="submitNote()" data-icon="check" href="" data-role="button" data-theme="i">Save</a></div>
+            <div class="ui-block-b"><a  data-icon="delete" href="#capturenotes" data-role="button" data-theme="i">Cancel</a></div>
+        </div><!-- /grid-b -->
+
+    </div><!-- /content -->
+
+
+</div><!-- /page WriteNote -->
+
+<!-- Start of third page: #EditNotePage -->
+<div data-role="page" id="EditNotePage">
+
+    <div data-role="header" data-theme="e">
+        <h1>Edit Note</h1>
+    </div>
+
+    <div data-role="content">
+
+        <div class="ui-grid-solo">
+            <label for="textarea-edit"></label>
+            <textarea name="textarea" id="textarea-edit"></textarea>
+
+        </div>
+
+        <div class="ui-grid-a" >
+            <div class="ui-block-a"><a onclick="AttemptUpdateNote()" data-theme="i" data-icon="check" href="" data-role="button">Update</a></div>
+            <div class="ui-block-b"><a onclick="AttemptDeleteNote()" data-theme="i"  data-icon="delete" href="" data-role="button">Delete</a></div>
+        </div><!-- /grid-b -->
+
+        <div class="ui-grid-b" style="margin-top:30px">
+            <div class="ui-block-a"></div>
+            <div class="ui-block-b"><a href="#four" data-direction="reverse" data-role="button" data-theme="i">Back</a></div>
+        </div><!-- /grid-b -->
+
+    </div><!-- /content -->
+
+</div><!-- /page EditNotePage -->
+
+<!-- Start of Report Generation Pages: #Choose Term -->
+<div data-role="page" id="ChooseTerm">
+
+    <div data-role="header" data-theme="c">
+        <h1>Choose Term</h1>
+    </div>
+
+    <div data-role="content">
+
+        <div class="ui-grid-solo" >
+            <a href="" onclick="onTermSelection('TermOne');" data-role="button" data-theme="c">Term One</a>
+        </div>
+
+        <div class="ui-grid-solo" >
+            <a href="" onclick="onTermSelection('TermTwo');" data-role="button" data-theme="c">Term Two</a>
+        </div>
+
+        <div class="ui-grid-solo" >
+            <a href="" onclick="onTermSelection('TermThree');" data-role="button" data-theme="c">Term Three</a>
+        </div>
+
+        <div class="ui-grid-solo">
+            <a href="" onclick="onTermSelection('TermFour');" data-role="button" data-theme="c">Term Four</a>
+        </div>
+
+        <div class="ui-grid-solo" >
+            <a href="" onclick="onTermSelection('Other');" data-role="button" data-theme="e">Other</a>
+        </div>
+
+        <div class="ui-grid-b" style="margin-top:30px">
+            <div class="ui-block-a"></div>
+            <div class="ui-block-b"><a href="#one" data-direction="reverse" data-role="button" data-theme="i">Back</a></div>
+        </div><!-- /grid-b -->
+
+    </div><!-- /content -->
+
+
+</div>
+<!-- End of Choose Term Page -->
+
+<!-- Start of Choose Student for Term page: #Choose Student Term -->
+<div data-role="page" id="ChooseStudentTerm">
+
+    <div data-role="header" data-theme="e">
+        <h1>Select Child</h1>
+    </div>
+
+    <div data-role="content">
+
+        <div class="ui-grid-a">
+            <div class="ui-block-a center-wrapper">
+                <div id="redlegend"  style="width: 15px; height: 15px; float:right; margin-left:5px; margin-right:10px; margin-top:5px; background-color:#F62817"></div>
+                <label for="" style="text-align: right; margin-top:3px; float:right;">Not Submitted:</label>
+
+            </div>
+            <div class="ui-block-b center-wrapper">
+
+                <label for="" style="text-align: right; float:left; margin-right:5px; margin-left:10px; margin-top:5px;">Submitted:</label>
+                <div id="greylegend"  style="width: 15px; height: 15px; float:left; margin-top:5px;  background-color:#52D017"></div>
+
+            </div>
+        </div>
+        <ul id="choosetermlist" data-role="listview" data-theme="" style="margin-top:10px">
+            <li data-theme="" style="text-align:center;background-image:none; text-shadow:none; background-color:#9FADBF;"> My Children </li>
+        </ul>
+
+        <div class="ui-grid-b" style="margin-top:30px">
+            <div class="ui-block-a"></div>
+            <div class="ui-block-b"><a href="#one" data-direction="reverse" data-role="button" data-theme="i">Back</a></div>
+        </div><!-- /grid-b -->
+
+    </div><!-- /content -->
+
+    <div data-role="footer" class="footer-docs ui-footer" data-theme="" style="background-color: #1589FF;border:0px; background-image:none;" role="contentinfo">
+        <div data-role="controlgroup" class="ui-footer ui-controlgroup-horizontall" data-type="horizontal" style="text-align:center">
+            <a onclick="ClearHistory()" data-theme="i" data-role="button" data-icon="minus" style="text-align:center; margin-top:5px; margin-bottom:5px; color:black">Clear Submission History</a>
+        </div>
+    </div>
+</div><!-- /page Choose Student Term -->
+
+<!-- Start of Choose Student for Term page: #Choose Template -->
+<div data-role="page" id="ChooseTemplate">
+
+    <div data-role="header" data-theme="e">
+        <h1 style="white-space:normal">Learning Story Template</h1><a data-role="button" data-icon="home" data-iconpos="notext" data-theme="i" data-inline="true" href="#one" data-icon="home"></a>
+    </div>
+
+    <div data-role="content">
+
+        <div class="ui-grid-a">
+            <div class="ui-block-a">
+                <div href="" onclick="onTemplateClick('A')" class="ui-bar ui-bar-a" style="height:205px;text-align: center; background-image:url(img/rsz_templatetwo.png);background-position:center;background-repeat:no-repeat;cursor:pointer;"></div>
+
+            </div>
+            <div class="ui-block-b">
+                <div href="" onclick="onTemplateClick('B')" class="ui-bar ui-bar-b" style="height:205px;text-align: center;background-image:url(img/rsz_templateone.png);background-position:center;background-repeat:no-repeat;cursor:pointer;"></div>
+            </div>
+        </div><!-- /grid-b -->
+
+        <div class="ui-grid-solo">
+            <div class="ui-block-a">
+                <p style="text-align:center; font-style:italic">Both templates allow up to three images to be attached</p>
+            </div>
+        </div>
+
+        <div class="ui-grid-b" style="margin-top:30px">
+            <div class="ui-block-a"></div>
+            <div class="ui-block-b"><a href="#ChooseStudentTerm" data-direction="reverse" data-role="button" data-theme="i">Back</a></div>
+            <div class="ui-block-c"></div>
+        </div><!-- /grid-b -->
+
+    </div><!-- /content -->
+
+
+</div><!-- /page Choose Template -->
+
+<!-- Start of Report Fill: #Report Fill -->
+<div data-role="page" id="ReportFill">
+
+<div data-role="header" data-theme="e">
+    <h1>Learning Story</h1><a data-role="button" data-icon="home" data-iconpos="notext" data-theme="i" data-inline="true" href="#one" data-icon="home"></a>
+    <h5 id="data-connection" style="color:black; font-weight:normal;text-shadow:none;font-style:italic; font-size:10px"></h5>
+</div>
+
+<div data-role="content">
+
+<div data-role="collapsible" data-collapsed="true" data-theme = "a">
+    <h3>Title & Date</h3>
+
+    <div data-role="controlgroup">
+        <div data-role="controlgroup">
+            <div data-role="fieldcontain">
+                <input style="" placeholder="Report Title" data-inline="true" type="text" name="name" id="ReportTitle" value=""  />
+            </div>
+
+            <div data-role="fieldcontain">
+                <input type="text" name="date" id="ReportDate" value=""  class="ui-input-text ui-body-c ui-corner-all ui-shadow-inset" placeholder="DD/MM/YYYY">
+            </div>
+        </div>
+    </div>
+</div>
+
+<div data-role="collapsible" data-collapsed = "true" data-theme = "b">
+    <h3>Choose Images</h3>
+
+    <div class="ui-grid-solo" style="margin-top:30px">
+        <div class="ui-block-a"><a style="text-shadow:none;font-weight:bold" data-role="button" data-theme="i" onclick="StartCamera()">Add Photo</a></div>
+    </div>
+
+    <div class="ui-grid-b" style="margin-top:20px">
+        <div id="image_one" class="ui-block-a" style="text-overflow:ellipsis;overflow:hidden;height:40px;line-height:40px">None</div>
+        <div class="ui-block-b"><a style="text-shadow:none;font-weight:bold" onclick="caption=0; if(ReportImages[0]) {$.blockUI({ message: '<h4>Loading Captions...</h4>'});location.href='#addcaption'}else {navigator.notification.alert('Alert',function() {}, 'No photo to add caption for.','Close');}" data-role="button" data-mini="true" data-inline="true" data-theme="b">Caption</a></div>
+        <div class="ui-block-c" style="height:40px;"><a style="text-shadow:none;font-weight:bold" onclick="if(ReportImages[0]) {removeImage(0);$.blockUI({ message: '<h4>Removing Image...</h4>'});}else { navigator.notification.alert('Alert',function() {}, 'No photo to remove.','Close'); }" data-role="button" data-mini="true" data-inline="true" data-theme="b" data-icon="delete" data-iconpos="notext"></a></div>
+
+        <div id="image_two" class="ui-block-a" style="text-overflow:ellipsis;height:40px;line-height:40px">None</div>
+        <div class="ui-block-b"><a style="text-shadow:none;font-weight:bold" onclick="caption=1; if(ReportImages[1]) {$.blockUI({ message: '<h4>Loading Captions...</h4>'});location.href='#addcaption'}else {navigator.notification.alert('Alert',function() {}, 'No photo to add caption for.','Close');}" data-role="button" data-mini="true" data-inline="true" data-theme="b">Caption</a></div>
+        <div class="ui-block-c" style="height:40px;"><a style="text-shadow:none;font-weight:bold" onclick="if(ReportImages[1]) {removeImage(1);$.blockUI({ message: '<h4>Removing Image...</h4>'});}else { navigator.notification.alert('Alert',function() {}, 'No photo to remove.','Close'); }" data-role="button" data-mini="true" data-inline="true" data-theme="b" data-icon="delete" data-iconpos="notext"></a></div>
+
+        <div id="image_three" class="ui-block-a" style="text-overflow:ellipsis;height:40px;line-height:40px">None</div>
+        <div class="ui-block-b"><a style="text-shadow:none;font-weight:bold" onclick="caption=2; if(ReportImages[2]) {$.blockUI({ message: '<h4>Loading Captions...</h4>'});location.href='#addcaption'}else {navigator.notification.alert('Alert',function() {}, 'No photo to add caption for.','Close');}" data-role="button" data-mini="true" data-inline="true" data-theme="b">Caption</a></div>
+        <div class="ui-block-c" style="height:40px;"><a style="text-shadow:none;font-weight:bold" onclick="if(ReportImages[2]) {removeImage(2);$.blockUI({ message: '<h4>Removing Image...</h4>'});}else { navigator.notification.alert('Alert',function() {}, 'No photo to remove.','Close'); }" data-role="button" data-mini="true" data-inline="true" data-theme="b" data-icon="delete" data-iconpos="notext"></a></div>
+    </div><!-- /grid-b -->
+</div>
+
+<div data-role="collapsible" data-collapsed = "true" data-theme = "c">
+    <h3>Observations</h3>
+
+    <ul id="ReportNotes" data-role="listview" data-theme="b" style="margin-top:10px;margin-bottom: 10px">
+    </ul>
+</div>
+
+<div data-role="collapsible" data-collapsed = "true" data-theme = "d">
+    <h3>Learning Outcomes</h3>
+
+
+    <div data-role="collapsible" data-collapsed = "true" data-theme = "d">
+        <h3>Early Years Learning Framework Outcomes</h3>
+        <div data-role="collapsible-set">
+            <div data-role="collapsible" data-collapsed = "true" data-theme = "c">
+                <h3 style="white-space:normal">Outcome One: Children have a strong sense of identity</h3>
+                <div data-role="collapsible-set">
+                    <ul data-role="listview" data-theme="i">
+                        <li ><a onclick="onSelectOutcome('EYLF','OutcomeOneA')" style="white-space:normal">Children feel safe, secure, and supported</a></li>
+                        <li><a onclick="onSelectOutcome('EYLF','OutcomeOneB')" style="white-space:normal">Children develop their emerging autonomy, inter-dependence, resilience and sense of agency</a></li>
+                        <li><a onclick="onSelectOutcome('EYLF','OutcomeOneC')" style="white-space:normal">Children develop knowledgeable and confident self identities</a></li>
+                        <li><a onclick="onSelectOutcome('EYLF','OutcomeOneD')" style="white-space:normal" >Children learn to interact in relation to others with care, empathy and respect</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div data-role="collapsible" data-collapsed = "true" data-theme = "c">
+                <h3>Outcome Two: Children are connected with and contribute to their world</h3>
+                <div data-role="collapsible-set">
+                    <ul data-role="listview" data-theme="i">
+                        <li><a onclick="onSelectOutcome('EYLF','OutcomeTwoA')" style="white-space:normal">Children develop a sense of belonging to groups and communities and an understanding of the reciprocal rights and responsibilities necessary for active community participation </a></li>
+                        <li><a onclick="onSelectOutcome('EYLF','OutcomeTwoB')" style="white-space:normal">Children respond to diversity with respect</a></li>
+                        <li><a onclick="onSelectOutcome('EYLF','OutcomeTwoC')" style="white-space:normal">Children become aware of fairness </a></li>
+                        <li><a onclick="onSelectOutcome('EYLF','OutcomeTwoD')" style="white-space:normal">Children become socially responsible and show respect for the environment</a></li>
+                    </ul>
+                </div>
+
+            </div>
+            <div data-role="collapsible" data-collapsed = "true" data-theme = "c">
+                <h3>Outcome Three: Children have a strong sense of well being</h3>
+                <div data-role="collapsible-set">
+                    <ul data-role="listview" data-theme="i">
+                        <li><a onclick="onSelectOutcome('EYLF','OutcomeThreeA')" style="white-space:normal">Children become strong in their social and emotional wellbeing</a></li>
+                        <li><a onclick="onSelectOutcome('EYLF','OutcomeThreeB')" style="white-space:normal">Children take increasing responsibility for their own health and physical wellbeing</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div data-role="collapsible" data-collapsed = "true" data-theme = "c">
+                <h3>Outcome Four: Children are confident and involved learners</h3>
+                <div data-role="collapsible-set">
+                    <ul data-role="listview" data-theme="i">
+                        <li><a onclick="onSelectOutcome('EYLF','OutcomeFourA')" style="white-space:normal">Children develop dispositions for learning such as curiosity, cooperation, confidence, creativity, commitment, enthusiasm, persistence, imagination and reflexivity </a></li>
+                        <li><a onclick="onSelectOutcome('EYLF','OutcomeFourB')" style="white-space:normal">Children develop a range of skills and processes such as problem solving, enquiry, experimentation, hypothesising, researching and investigating</a></li>
+                        <li><a onclick="onSelectOutcome('EYLF','OutcomeFourC')" style="white-space:normal">Children transfer and adapt what they have learned from one context to another</a></li>
+                        <li><a onclick="onSelectOutcome('EYLF','OutcomeFourD')" style="white-space:normal">Children resource their own learning through connecting with people, place, technologies and natural and processed materials</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div data-role="collapsible" data-collapsed = "true" data-theme = "c">
+                <h3>Outcome Five: Children are effective communicators</h3>
+                <div data-role="collapsible-set">
+                    <ul data-role="listview" data-theme="i">
+                        <li><a onclick="onSelectOutcome('EYLF','OutcomeFiveA')" style="white-space:normal">Children interact verbally and non-verbally with others for a range of purposes </a></li>
+                        <li><a onclick="onSelectOutcome('EYLF','OutcomeFiveB')" style="white-space:normal">Children engage with a range of texts and gain meaning from these texts </a></li>
+                        <li><a onclick="onSelectOutcome('EYLF','OutcomeFiveC')" style="white-space:normal">Children express ideas and make meaning using a range of media</a></li>
+                        <li><a onclick="onSelectOutcome('EYLF','OutcomeFiveD')" style="white-space:normal">Children begin to understand how symbols and pattern systems work</a></li>
+                        <li><a onclick="onSelectOutcome('EYLF','OutcomeFiveE')" style="white-space:normal">Children use information and communication technologies to access information, investigate ideas and represent their thinking</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div data-role="collapsible" data-collapsed = "true" data-theme = "d">
+        <h3>EYLF Principles</h3>
+        <div data-role="collapsible-set">
+                <input type="checkbox" name="checkbox-1" id="checkbox-1" class="custom" onclick="PrinciplesCheck(event)" />
+                <label for="checkbox-1">Secure, respectful and reciprocal relationships</label>
+
+                <input type="checkbox" name="checkbox-2" id="checkbox-2" class="custom" onclick="PrinciplesCheck(event)" />
+                <label for="checkbox-2">Partnerships</label>
+
+                <input type="checkbox" name="checkbox-3" id="checkbox-3" class="custom" onclick="PrinciplesCheck(event)" />
+                <label for="checkbox-3">High expectations and equity</label>
+
+                <input type="checkbox" name="checkbox-4" id="checkbox-4" class="custom" onclick="PrinciplesCheck(event)" />
+                <label for="checkbox-4">Respect for diversity</label>
+
+                <input type="checkbox" name="checkbox-5" id="checkbox-5" class="custom" onclick="PrinciplesCheck(event)" />
+                <label for="checkbox-5">Ongoing learning and reflective practice</label>
+
+        </div>
+    </div>
+    <div data-role="collapsible" data-collapsed = "true" data-theme = "d">
+        <h3>EYLF Practices</h3>
+        <div data-role="collapsible-set">
+                    <input type="checkbox" name="checkbox-a" id="checkbox-a" class="custom" onclick="PracticesCheck(event)" />
+                    <label for="checkbox-a">Adopting holistic approaches</label>
+
+                    <input type="checkbox" name="checkbox-b" id="checkbox-b" class="custom" onclick="PracticesCheck(event)" />
+                    <label for="checkbox-b">Responsiveness to children</label>
+
+                    <input type="checkbox" name="checkbox-c" id="checkbox-c" class="custom" onclick="PracticesCheck(event)" />
+                    <label for="checkbox-c"> Learning through play</label>
+
+                    <input type="checkbox" name="checkbox-d" id="checkbox-d" class="custom" onclick="PracticesCheck(event)" />
+                    <label for="checkbox-d">Intentional teaching</label>
+
+                    <input type="checkbox" name="checkbox-e" id="checkbox-e" class="custom" onclick="PracticesCheck(event)" />
+                    <label for="checkbox-e">Learning environments</label>
+
+                    <input type="checkbox" name="checkbox-f" id="checkbox-f" class="custom" onclick="PracticesCheck(event)" />
+                    <label for="checkbox-f">Cultural competence</label>
+
+                    <input type="checkbox" name="checkbox-g" id="checkbox-g" class="custom" onclick="PracticesCheck(event)" />
+                    <label for="checkbox-g">Continuity of learning and transitions</label>
+
+                    <input type="checkbox" name="checkbox-h" id="checkbox-h" class="custom" onclick="PracticesCheck(event)" />
+                    <label for="checkbox-h">Assessment for learning</label>
+        </div>
+    </div>
+</div>
+
+<div data-role="collapsible" data-collapsed = "true" data-theme = "e">
+    <h3>Follow Up Experience</h3>
+    <div data-role="fieldcontain">
+        <label for="followuptext"></label>
+        <textarea name="textarea" id="followuptext"></textarea>
+    </div>
+</div>
+
+<div data-role="collapsible" data-collapsed = "true" data-theme = "f">
+    <h3>Evaluation</h3>
+    <div data-role="fieldcontain">
+        <label for="evaluationtext"></label>
+        <textarea name="textarea" id="evaluationtext"></textarea>
+    </div>
+</div>
+
+<div data-role="collapsible" data-collapsed = "true" data-theme = "h">
+    <h3>Style Options</h3>
+
+    <div data-role="set">
+        <a href="#choosefont" data-role="button" data-rel="dialog" data-transition="pop" style="font-weight: bold;">Choose Font</a>
+        <a href="#choosefontcolour" data-role="button" data-rel="dialog" data-transition="pop" style="font-weight: bold;">Choose Font Colour</a>
+        <a href="#choosebackground" data-role="button" data-rel="dialog" data-transition="pop" style="font-weight: bold;">Choose Background</a>
+    </div>
+</div>
+</div>
+
+
+
+<div class="ui-grid-solo" style="margin-top:10px">
+    <div class="ui-block-a"><input id="eInputReport" type="email" name="" id="name" value="" placeholder="Parent Email"/></div>
+</div>
+
+
+<div class="ui-grid-solo" style="margin-top:10px;margin-bottom:15px">
+    <div class="ui-block-a"><input id="TRinput" type="email" name="" id="name" value="" placeholder="Teacher OR Other Recipient Email"/></div>
+</div>
+
+<div class="ui-grid-solo" style="margin-top:20px" >
+    <a onclick="onSubmitReport()" data-icon="check" href="" data-role="button" style="text-shadow:none;font-weight:bold">Submit Report</a>
+
+</div>
+
+<div class="ui-grid-solo" style="margin-top:20px" >
+    <a onclick="onSubmitReport('test')" data-icon="check" href="" data-role="button" style="text-shadow:none; font-weight:bold" data-theme="b">Send Test Report To Teacher Only</a>
+</div>
+
+<div class="ui-grid-solo" style="margin-top:20px" >
+    <a  data-icon="delete" href="#ChooseTemplate" data-role="button" data-theme="i">Back</a>
+</div>
+
+
+</div><!-- /content -->
+
+
+</div><!-- /page Report Fill -->
+
+<!-- This page is used to fill learning outcomes -->
+<div data-role="dialog" id="OutcomeSelection">
+
+    <div data-role="header" data-theme="e">
+        <h1 id="outcomeheading" style="overflow:visible">Outcome Observations</h1>
+    </div>
+
+    <div data-role="content">
+
+        <ul id="outcomelist" data-role="listview" data-theme="c">
+        </ul>
+
+        <div class="ui-grid-solo" style="margin-top:30px;text-align:center">
+            <a href="#" data-rel="back" data-role="button" data-theme="i">Back</a>
+        </div><!-- /grid-b -->
+
+    </div><!-- /content -->
+
+
+</div><!-- /end of Outcome Selection -->
+
+<!-- Start of third page: #Caption -->
+<div data-role="dialog" id="addcaption">
+
+    <div data-role="header" data-theme="c">
+        <h1>Add Caption</h1>
+    </div>
+
+    <div data-role="content">
+
+        <div class="ui-grid-solo">
+            <label for="textarea-a"></label>
+            <textarea name="textarea" id="captiontext"></textarea>
+        </div>
+
+        <div class="ui-grid-a" style="margin-top:30px">
+            <div class="ui-block-a"><a onclick="saveCaption()" data-icon="check" data-rel="back" href="#" data-role="button">Add</a></div>
+            <div class="ui-block-b"><a onclick="saveCaption('none')"  data-icon="delete" href="#" data-rel="back" data-role="button">Cancel</a></div>
+        </div><!-- /grid-b -->
+
+    </div><!-- /content -->
+</div><!-- /page Choose Your Font -->
+
+<div data-role="dialog" id="choosefont">
+
+    <div data-role="header" data-theme="c">
+        <h1>Choose Font</h1>
+    </div>
+
+    <div data-role="content">
+
+        <div class="ui-grid-solo">
+            <ul id="chooseFontList" data-role="listview" data-theme="i" style="margin-top:5px">
+                <li style="cursor:pointer" onclick="SelectedFont = 'A'; document.getElementById('fontClose').click();">
+                    <a>
+                        <h3 style="font-family:cursive">Cursive</h3>
+                        <p style="font-family:cursive">Click here to select this font</p>
+                    </a>
+                </li>
+                <li style="cursor:pointer" onclick="SelectedFont = 'B';document.getElementById('fontClose').click();">
+                    <a>
+                    <h3 style="font-family:fantasy">Fantasy</h3>
+                    <p style="font-family:fantasy">Click here to select this font</p>
+                    </a>
+                </li>
+                <li style="cursor:pointer" onclick="SelectedFont = 'C';document.getElementById('fontClose').click();">
+                    <a>
+                    <h3 style="font-family:helvetica">Helvetica</h3>
+                    <p style="font-family:helvetica">Click here to select this font</p>
+                    </a>
+                </li>
+                <li style="cursor:pointer" onclick="SelectedFont = 'D';document.getElementById('fontClose').click();">
+                    <a>
+                    <h3 style="font-family:palatino">Palatino</h3>
+                    <p style="font-family:palatino">Click here to select this font</p>
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <div class="ui-grid-solo" style="margin-top:30px">
+            <div class="ui-block-a"><a id="fontClose" data-icon="check" href="#" data-rel="back" data-role="button">Done</a></div>
+        </div><!-- /grid-b -->
+
+    </div><!-- /content -->
+</div><!-- /page ChooseFont -->
+
+<div data-role="dialog" id="choosefontcolour">
+
+    <div data-role="header" data-theme="c">
+        <h1>Choose Font Colour</h1>
+    </div>
+
+    <div class="ui-grid-solo" style="text-align:center; margin-bottom:5px; margin-top:15px; ">
+        <span style="text-align: center; font-size:10px; font-style:italic">Please do not select a Font Colour identical to your Background Colour</span>
+    </div>
+
+    <div data-role="content">
+
+        <div class="ui-grid-solo">
+            <ul id="choosefontcolourlist" data-role="listview" data-theme="i" style="margin-top:5px">
+                <li style="cursor:pointer" onclick="SelectedFontColour = 'A';document.getElementById('colourClose').click();">
+                    <a>
+                        <h3 style="color:black">Black</h3>
+                        <p>Click here to select this font colour</p>
+                    </a>
+                </li>
+                <li style="cursor:pointer" onclick="SelectedFontColour = 'B';document.getElementById('colourClose').click();">
+                    <a>
+                        <h3 style="color:black">White</h3>
+                        <p>Click here to select this font colour</p>
+                    </a>
+                </li>
+                <li style="cursor:pointer" onclick="SelectedFontColour = 'C';document.getElementById('colourClose').click();">
+                    <a>
+                        <h3 style="color:#00008B">Blue</h3>
+                        <p>Click here to select this font colour</p>
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <div class="ui-grid-solo" style="margin-top:30px">
+            <div class="ui-block-a"><a id="colourClose" data-icon="check" href="#" data-rel="back" data-role="button">Done</a></div>
+        </div><!-- /grid-b -->
+
+    </div><!-- /content -->
+</div><!-- /page ChooseFont -->
+
+<!-- /page Choose Your Background -->
+
+<div data-role="dialog" id="choosebackground">
+
+    <div data-role="header" data-theme="c">
+        <h1>Choose Background</h1>
+    </div>
+
+    <div class="ui-grid-solo" style="text-align:center; margin-top:15px; margin-bottom:5px">
+        <span style="text-align: center; font-size:10px; font-style:italic">Please do not select a Background Colour identical to your Font Colour</span>
+    </div>
+
+    <div data-role="content">
+
+        <div class="ui-grid-solo">
+            <ul id="choosebackgroundlist" data-role="listview" data-theme="i" style="margin-top:5px">
+                <li onclick="SelectedBackground = 'A';document.getElementById('bgClose').click();">
+                    <a>
+                        <h3>Light Green</h3>
+                        <p>Click to Choose</p>
+                    </a>
+                </li>
+                <li onclick="SelectedBackground = 'B';document.getElementById('bgClose').click();">
+                    <a>
+                        <h3>Slate Gray</h3>
+                        <p>Click to Choose</p>
+                    </a>
+                </li>
+                <li onclick="SelectedBackground = 'C';document.getElementById('bgClose').click();">
+                    <a>
+                        <h3>Teal</h3>
+                        <p>Click to Choose</p>
+                    </a>
+                </li>
+                <li onclick="SelectedBackground = 'D';document.getElementById('bgClose').click();">
+                    <a>
+                        <h3>Light Blue</h3>
+                        <p>Click to Choose</p>
+                    </a>
+                </li>
+                <li onclick="SelectedBackground = 'E';document.getElementById('bgClose').click();">
+                    <a>
+                        <h3>No Background</h3>
+                        <p>Click to Choose</p>
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <div class="ui-grid-solo" style="margin-top:30px">
+            <div class="ui-block-a"><a id="bgClose" data-icon="check" href="#" data-rel="back" data-role="button">Done</a></div>
+        </div><!-- /grid-b -->
+
+    </div><!-- /content -->
+</div><!-- /page ChooseFont -->
+
+<!-- End of Report Generation Pages -->
+
+
+
+<script>
+
+</script>
+
+<script src="js/Application.js"></script>
+<script src="js/SyncDB.js"></script>
+<script src="js/data.js"></script>
+<script src="js/GenerateEmail.js"></script>
+
+<script>
+
+    $('#ReportFill').bind('pageshow', function() {
+
+
+        /*
+        //Set Email Values
+        $("#eInputReport").val(CurrentStudent.Parent);
+        $("#TRinput").val(Globals.teacher);
+
+        //Set Title
+        $("#ReportTitle").val(CurrentStudent.name + "'s Learning Story");
+
+        //Set Date
+        var today = new Date();
+        var dd = today.getDate();
+        var mm = today.getMonth()+1;
+        var yyyy = today.getFullYear();
+        if(dd<10){dd='0'+dd}
+        if(mm<10){mm='0'+mm}
+        today = dd +'/'+mm+'/'+yyyy;
+        $("#ReportDate").val(today);
+
+        //Restore Style Defaults
+        SelectedBackground = "E";
+        SelectedFont = "A";
+        SelectedFontColour = "A";
+
+        //Clear Evaluation & Followup
+        $("#followuptext").val("");
+        $("#evaluationtext").val("");
+
+        //Clear Principles & Practices
+        $("input[type='checkbox']").attr("checked",false).checkboxradio("refresh");
+        SelectedPractices = [];
+        SelectedPrinciples = [];
+
+        //Clear Outcomes
+        ReportOutcomes = [];
+
+        //Clear Notes
+        ReportCheckBoxesNotes = [];
+        $('#ReportNotes').empty();
+        GenerateReportNotes();
+
+        //Clear Images
+        ReportCheckBoxesCaption = [];
+        ReportCheckBoxesImages = [];
+        $('#ReportImages').empty();
+        GenerateReportImageGrid();
+        */
+        $.unblockUI();
+        var holder = $("#data-connection").text(checkConnection());
+        $("#TRinput").val(Globals.teacher);
+
+    });
+
+    $('#addcaption').bind('pageshow', function() {
+        $.unblockUI();
+    });
+
+
+    $('#ReportFill').bind('pagebeforeshow', function() {
+        $.blockUI({ message: '<h4><img src="./img/busy.gif" /> Loading Report Form...</h4>' });
+        $("#TRinput").val(Globals.teacher);
+    });
+
+    $('#ReportFill').bind('pagebeforehide', function() {
+    });
+
+    $('#choosefont').bind('pagebeforeshow', function() {
+        var List = $('#chooseFontList')[0];
+        var selection = ['A','B','C','D','E'];
+        $("#chooseFontList >li>div").css('background-color','');
+        $($($(List).children()[selection.indexOf(SelectedFont)]).children()[0]).css('background-color','silver');
+    });
+
+    $('#choosefontcolour').bind('pagebeforeshow', function() {
+        var List = $('#choosefontcolourlist')[0];
+        var selection = ['A','B','C','D','E'];
+        $("#choosefontcolourlist >li>div").css('background-color','');
+        $($($(List).children()[selection.indexOf(SelectedFontColour)]).children()[0]).css('background-color','silver');
+    });
+
+    $('#choosebackground').bind('pagebeforeshow', function() {
+        var List = $('#choosebackgroundlist')[0];
+        var selection = ['A','B','C','D','E'];
+        $("#choosebackgroundlist >li>div").css('background-color','');
+        $($($(List).children()[selection.indexOf(SelectedBackground)]).children()[0]).css('background-color','silver');
+    });
+
+    $('#four').bind('pageinit', function() {
+        $("#UEinput").val(CurrentStudent.Parent);
+    });
+
+    $('#teachersemail').bind('pageinit', function() {
+        $("#Tinput").val(Globals.teacher);
+    });
+
+    $('#teachersemail').bind('pageshow', function() {
+        $("#Tinput").val(Globals.teacher);
+    });
+
+
+    $('#four').bind('pageshow', function() {
+        $("#UEinput").val(CurrentStudent.Parent);
+    });
+
+
+
+
+</script>
+
+
+</body>
+</html>
