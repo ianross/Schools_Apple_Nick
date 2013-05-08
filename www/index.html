@@ -1265,7 +1265,7 @@ function PracticesCheck(e) {
     <div id="MainWindow" data-role="content">
 
 
-        <div data-role="collapsible" data-collapsed="true" data-theme = "b">
+        <div data-role="collapsible" data-collapsed="true" data-theme = "b" class="headIcon">
             <h3>My Class</h3>
             <a style="text-shadow:none;font-weight:bold" id="Edit" href="#three" data-role="button">View Children</a>
             <a style="text-shadow:none;font-weight:bold" id="Add" href="#two" data-role="button">Add Child</a>
@@ -1273,20 +1273,10 @@ function PracticesCheck(e) {
             <a style="text-shadow:none;font-weight:bold" id="" href="#teachersemail" data-role="button">Teacher's Email</a>
         </div>
 
-        <div data-role="collapsible" data-collapsed = "true" data-theme = "d">
-            <h3>Capture Data</h3>
+        <a data-theme = "d" style="text-shadow:none;font-weight:bold" id="Notes" href="#capturenotes" data-role="button">Write Observations</a>
 
-            <!--<a style="text-shadow:none;font-weight:bold" id="Image" href="#captureimage" data-role="button">Capture Picture</a>-->
-            <a style="text-shadow:none;font-weight:bold" id="Notes" href="#capturenotes" data-role="button">Write Observations</a>
+        <a data-theme = "a" style="text-shadow:none;font-weight:bold" onclick="onTermSelection('TermOne');" href="#ChooseStudentTerm"  data-role="button">Create Learning Story</a>
 
-        </div>
-
-        <div data-role="collapsible" data-collapsed = "true" data-theme = "a">
-            <h3>Create Learning Story</h3>
-
-            <a style="text-shadow:none;font-weight:bold" onclick="onTermSelection('TermOne');" href="#ChooseStudentTerm"  data-role="button">Generate Learning Story</a>
-
-        </div>
 
         <!-- START OF POPUPS -->
 
