@@ -238,7 +238,7 @@ Email.prototype.GenerateEmail = function(template) {
             num += 1;
         }
 
-        if(this.evaluation != "") {
+        if(this.evaluation != "" || this.follow != "") {
             num += 1;
         }
 
