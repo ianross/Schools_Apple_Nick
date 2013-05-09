@@ -156,6 +156,8 @@ function updateSuccess(){
     Application.UpdateAllContent();
     CallbackData = null;
 
+    $('#four').trigger('pageshow');
+
 };
 
 function updateImagesSuccess() {

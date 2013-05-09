@@ -552,11 +552,11 @@ function onSuccess(imageURI) {
 
 function removeImage(index) {
 
-    if(index == 0) { $('#image_one').text('No Photo')}
+    if(index == 0) { $('#image_one').text('No Photo').css("font-style", "normal");}
 
-    if(index == 1) {$('#image_two').text('No Photo')}
+    if(index == 1) {$('#image_two').text('No Photo').css("font-style", "normal");}
 
-    if(index == 2) {$('#image_three').text('No Photo')}
+    if(index == 2) {$('#image_three').text('No Photo').css("font-style", "normal");}
 
     //Fix array...
     if(ReportImages[index]) {
@@ -574,20 +574,20 @@ function removeImage(index) {
 
 function ResetImages() {
     //Set all to No Photo attached...
-    $('#image_one').text('No Photo');
-    $('#image_two').text('No Photo');
-    $('#image_three').text('No Photo');
+    $('#image_one').text('No Photo').css("font-style", "normal");
+    $('#image_two').text('No Photo').css("font-style", "normal");
+    $('#image_three').text('No Photo').css("font-style", "normal");
 
     //Rebuild...
     for(var i=0;i< ReportImages.length;i++) {
             if(i==0) {
-                $('#image_one').text('Photo One');
+                $('#image_one').text('Photo One').css("font-style", "bold");
             }
             if(i==1) {
-                $('#image_two').text('Photo Two');
+                $('#image_two').text('Photo Two').css("font-style", "bold");
             }
             if(i==2) {
-                $('#image_three').text('Photo Three');
+                $('#image_three').text('Photo Three').css("font-style", "bold");
             }
     }
 }
@@ -1264,18 +1264,14 @@ function PracticesCheck(e) {
 
     <div id="MainWindow" data-role="content">
 
+            <a data-icon='arrow-r' style="margin-bottom:20px; text-shadow:none;font-weight:bold" id="Edit" href="#three" data-role="button">View Children</a>
+            <a data-icon='arrow-r' style="margin-bottom:20px; text-shadow:none;font-weight:bold" id="Add" href="#two" data-role="button">Add Child</a>
+            <a data-icon='arrow-r' style="margin-bottom:20px; text-shadow:none;font-weight:bold" id="Remove" href="#removestudent" data-role="button">Remove Child</a>
+            <a data-icon='arrow-r' style="margin-bottom:20px; text-shadow:none;font-weight:bold" id="" href="#teachersemail" data-role="button">Teacher's Email</a>
 
-        <div data-role="collapsible" data-collapsed="true" data-theme = "b" class="headIcon">
-            <h3>My Class</h3>
-            <a style="text-shadow:none;font-weight:bold" id="Edit" href="#three" data-role="button">View Children</a>
-            <a style="text-shadow:none;font-weight:bold" id="Add" href="#two" data-role="button">Add Child</a>
-            <a style="text-shadow:none;font-weight:bold" id="Remove" href="#removestudent" data-role="button">Remove Child</a>
-            <a style="text-shadow:none;font-weight:bold" id="" href="#teachersemail" data-role="button">Teacher's Email</a>
-        </div>
+        <a data-icon='info' data-theme = "d" style="margin-bottom:20px;text-shadow:none;font-weight:bold" id="Notes" href="#capturenotes" data-role="button">Write Observations</a>
 
-        <a data-theme = "d" style="text-shadow:none;font-weight:bold" id="Notes" href="#capturenotes" data-role="button">Write Observations</a>
-
-        <a data-theme = "a" style="text-shadow:none;font-weight:bold" onclick="onTermSelection('TermOne');" href="#ChooseStudentTerm"  data-role="button">Create Learning Story</a>
+        <a data-icon='grid' data-theme = "a" style="margin-bottom:20px;text-shadow:none;font-weight:bold" onclick="onTermSelection('TermOne');" href="#ChooseStudentTerm"  data-role="button">Create Learning Story</a>
 
 
         <!-- START OF POPUPS -->
@@ -1422,7 +1418,7 @@ function PracticesCheck(e) {
 <div data-role="page" id="four">
 
     <div data-role="header" data-theme="e">
-        <h1>View Child</h1><a data-role="button" data-icon="home" data-iconpos="notext" data-theme="i" data-inline="true" href="#one" data-icon="home"></a>
+        <h1 id="pg4Header">View Child</h1><a data-role="button" data-icon="home" data-iconpos="notext" data-theme="i" data-inline="true" href="#one" data-icon="home"></a>
     </div>
 
     <div id="MainWindow" data-role="content">
@@ -1764,7 +1760,7 @@ function PracticesCheck(e) {
 <div data-role="page" id="ReportFill">
 
 <div data-role="header" data-theme="e">
-    <h1>Learning Story</h1><a data-role="button" data-icon="home" data-iconpos="notext" data-theme="i" data-inline="true" href="#one" data-icon="home"></a>
+    <h1 id="reportFillHeader">Learning Story</h1><a data-role="button" data-icon="home" data-iconpos="notext" data-theme="i" data-inline="true" href="#one" data-icon="home"></a>
     <h5 id="data-connection" style="color:black; font-weight:normal;text-shadow:none;font-style:italic; font-size:10px"></h5>
 </div>
 
@@ -2249,6 +2245,7 @@ function PracticesCheck(e) {
     $('#ReportFill').bind('pagebeforeshow', function() {
         $.blockUI({ message: '<h4><img src="./img/busy.gif" /> Loading Report Form...</h4>' });
         $("#TRinput").val(Globals.teacher);
+        $("#reportFillHeader").text(CurrentStudent.name + "'s Learning Story")
     });
 
     $('#ReportFill').bind('pagebeforehide', function() {
@@ -2287,8 +2284,9 @@ function PracticesCheck(e) {
         $("#Tinput").val(Globals.teacher);
     });
 
-
     $('#four').bind('pageshow', function() {
+        $("#pg4Header").text(CurrentStudent.name + "'s Information");
+        $("#NewNameInput").val(CurrentStudent.name);
         $("#UEinput").val(CurrentStudent.Parent);
     });
 
