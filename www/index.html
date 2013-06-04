@@ -575,9 +575,9 @@ function removeImage(index) {
 
 function ResetImages() {
     //Set all to No Photo attached...
-    $('#image_one').text('Add Photo One').css("font-style", "normal");
-    $('#image_two').text('Add Photo Two').css("font-style", "normal");
-    $('#image_three').text('Add Photo Three').css("font-style", "normal");
+    $('#image_one').text('No Photo').css("font-style", "normal");
+    $('#image_two').text('No Photo').css("font-style", "normal");
+    $('#image_three').text('No Photo').css("font-style", "normal");
 
     //Rebuild...
     for(var i=0;i< ReportImages.length;i++) {
@@ -590,22 +590,6 @@ function ResetImages() {
             if(i==2) {
                 $('#image_three').text('Photo Three Added').css("font-style", "bold");
             }
-    }
-    $('#c0 span span').text("Add Caption");
-    $('#c1 span span').text("Add Caption");
-    $('#c2 span span').text("Add Caption");
-
-    //Rebuild...
-    for(var i=0;i< ReportCaptions.length;i++) {
-        if(i==0) {
-            $('#c0 span span').text(ReportCaptions[i]);
-        }
-        if(i==1) {
-            $('#c1 span span').text(ReportCaptions[i]);
-        }
-        if(i==2) {
-            $('#c2 span span').text(ReportCaptions[i]);
-        }
     }
 }
 
@@ -728,7 +712,6 @@ function saveCaption (none) {
     else {
         var text = $(document.getElementById('captiontext')).val();
         ReportCaptions[caption] = text;
-        $('#c'+ caption + ' span span').text(text);
         $(document.getElementById('captiontext')).val('');
     }
 }
@@ -1816,17 +1799,15 @@ margin: 0 auto;
 
     <div class="ui-grid-b" style="margin-top:20px">
         <div id="image_one" class="ui-block-a" style="text-overflow:ellipsis;overflow:hidden;height:40px;line-height:40px">Add Photo One</div>
-        <div class="ui-block-b">
-            <a id="c0" style="text-shadow:none;font-weight:bold" onclick="caption=0; if(ReportImages[0]) {$.blockUI({ message: '<h4>Loading Captions...</h4>'});location.href='#addcaption'}else {navigator.notification.alert('Alert',function() {}, 'No photo to add caption for.','Close');}" data-role="button" data-mini="true" data-inline="true" data-theme="b">Add Caption</a>
-        </div>
+        <div class="ui-block-b"><a style="text-shadow:none;font-weight:bold" onclick="caption=0; if(ReportImages[0]) {$.blockUI({ message: '<h4>Loading Captions...</h4>'});location.href='#addcaption'}else {navigator.notification.alert('Alert',function() {}, 'No photo to add caption for.','Close');}" data-role="button" data-mini="true" data-inline="true" data-theme="b">Add Caption</a></div>
         <div class="ui-block-c" style="height:40px;"><a style="text-shadow:none;font-weight:bold" onclick="if(ReportImages[0]) {removeImage(0);$.blockUI({ message: '<h4>Removing Image...</h4>'});}else { navigator.notification.alert('Alert',function() {}, 'No photo to remove.','Close'); }" data-role="button" data-mini="true" data-inline="true" data-theme="b" data-icon="delete" data-iconpos="notext"></a></div>
 
         <div id="image_two" class="ui-block-a" style="text-overflow:ellipsis;height:40px;line-height:40px">Add Photo Two</div>
-        <div class="ui-block-b"><a id="c1" style="text-shadow:none;font-weight:bold" onclick="caption=1; if(ReportImages[1]) {$.blockUI({ message: '<h4>Loading Captions...</h4>'});location.href='#addcaption'}else {navigator.notification.alert('Alert',function() {}, 'No photo to add caption for.','Close');}" data-role="button" data-mini="true" data-inline="true" data-theme="b">Add Caption</a></div>
+        <div class="ui-block-b"><a style="text-shadow:none;font-weight:bold" onclick="caption=1; if(ReportImages[1]) {$.blockUI({ message: '<h4>Loading Captions...</h4>'});location.href='#addcaption'}else {navigator.notification.alert('Alert',function() {}, 'No photo to add caption for.','Close');}" data-role="button" data-mini="true" data-inline="true" data-theme="b">Add Caption</a></div>
         <div class="ui-block-c" style="height:40px;"><a style="text-shadow:none;font-weight:bold" onclick="if(ReportImages[1]) {removeImage(1);$.blockUI({ message: '<h4>Removing Image...</h4>'});}else { navigator.notification.alert('Alert',function() {}, 'No photo to remove.','Close'); }" data-role="button" data-mini="true" data-inline="true" data-theme="b" data-icon="delete" data-iconpos="notext"></a></div>
 
         <div id="image_three" class="ui-block-a" style="text-overflow:ellipsis;height:40px;line-height:40px">Add Photo Three</div>
-        <div class="ui-block-b"><a id="c2" style="text-shadow:none;font-weight:bold" onclick="caption=2; if(ReportImages[2]) {$.blockUI({ message: '<h4>Loading Captions...</h4>'});location.href='#addcaption'}else {navigator.notification.alert('Alert',function() {}, 'No photo to add caption for.','Close');}" data-role="button" data-mini="true" data-inline="true" data-theme="b">Add Caption</a></div>
+        <div class="ui-block-b"><a style="text-shadow:none;font-weight:bold" onclick="caption=2; if(ReportImages[2]) {$.blockUI({ message: '<h4>Loading Captions...</h4>'});location.href='#addcaption'}else {navigator.notification.alert('Alert',function() {}, 'No photo to add caption for.','Close');}" data-role="button" data-mini="true" data-inline="true" data-theme="b">Add Caption</a></div>
         <div class="ui-block-c" style="height:40px;"><a style="text-shadow:none;font-weight:bold" onclick="if(ReportImages[2]) {removeImage(2);$.blockUI({ message: '<h4>Removing Image...</h4>'});}else { navigator.notification.alert('Alert',function() {}, 'No photo to remove.','Close'); }" data-role="button" data-mini="true" data-inline="true" data-theme="b" data-icon="delete" data-iconpos="notext"></a></div>
     </div><!-- /grid-b -->
 </div>
@@ -1952,31 +1933,32 @@ margin: 0 auto;
     </div>
 </div>
 
-    <div data-role="collapsible" data-collapsed = "true" data-theme = "e">
-        <h3>Follow Up Experience</h3>
-        <div data-role="fieldcontain">
-            <label for="followuptext"></label>
-            <textarea name="textarea" id="followuptext"></textarea>
-        </div>
+<div data-role="collapsible" data-collapsed = "true" data-theme = "e">
+    <h3>Follow Up Experience</h3>
+    <div data-role="fieldcontain">
+        <label for="followuptext"></label>
+        <textarea name="textarea" id="followuptext"></textarea>
     </div>
+</div>
 
-    <div data-role="collapsible" data-collapsed = "true" data-theme = "f">
-        <h3>Evaluation</h3>
-        <div data-role="fieldcontain">
-            <label for="evaluationtext"></label>
-            <textarea name="textarea" id="evaluationtext"></textarea>
-        </div>
+<div data-role="collapsible" data-collapsed = "true" data-theme = "f">
+    <h3>Evaluation</h3>
+    <div data-role="fieldcontain">
+        <label for="evaluationtext"></label>
+        <textarea name="textarea" id="evaluationtext"></textarea>
     </div>
+</div>
 
-    <div data-role="collapsible" data-collapsed = "true" data-theme = "h">
-        <h3>Style Options</h3>
+<div data-role="collapsible" data-collapsed = "true" data-theme = "h">
+    <h3>Style Options</h3>
 
-        <div data-role="set">
-            <a href="#choosebackground" data-role="button" data-rel="dialog" data-transition="pop" style="font-weight: bold;">Choose Background</a>
-            <a href="#choosefont" data-role="button" data-rel="dialog" data-transition="pop" style="font-weight: bold;">Choose Font</a>
-            <a href="#choosefontcolour" data-role="button" data-rel="dialog" data-transition="pop" style="font-weight: bold;">Choose Font Colour</a>
-        </div>
+    <div data-role="set">
+        <a href="#choosebackground" data-role="button" data-rel="dialog" data-transition="pop" style="font-weight: bold;">Choose Background</a>
+        <a href="#choosefont" data-role="button" data-rel="dialog" data-transition="pop" style="font-weight: bold;">Choose Font</a>
+        <a href="#choosefontcolour" data-role="button" data-rel="dialog" data-transition="pop" style="font-weight: bold;">Choose Font Colour</a>
+
     </div>
+</div>
 </div>
 
 
