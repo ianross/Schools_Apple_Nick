@@ -191,6 +191,7 @@ function AttemptUpdateImage() {
     UpdateStudentCustomCallbackInDB(CurrentStudent.name, CallbackData, PrepDBData(CurrentStudent.notes), editImageSuccess)
 }
 
+/*
 function RemoveImage() {
 
     //Copy of notes...
@@ -200,7 +201,7 @@ function RemoveImage() {
     UpdateStudentImagesCustomCallbackInDB(CurrentStudent.name, PrepDBData(clone), updateImageDeleteSuccess)
 
 }
-
+*/
 //Used to display / delete student images
 function GenerateImageGrid() {
     if(CurrentStudent.name != "No Student Selected") {
@@ -552,11 +553,11 @@ function onSuccess(imageURI) {
 
 function removeImage(index) {
 
-    if(index == 0) { $('#image_one').text('No Photo').css("font-style", "normal");}
+    if(index == 0) { $('#image_one').text('Add Photo One').css("font-style", "normal");}
 
-    if(index == 1) {$('#image_two').text('No Photo').css("font-style", "normal");}
+    if(index == 1) {$('#image_two').text('Add Photo Two').css("font-style", "normal");}
 
-    if(index == 2) {$('#image_three').text('No Photo').css("font-style", "normal");}
+    if(index == 2) {$('#image_three').text('Add Photo Three').css("font-style", "normal");}
 
     //Fix array...
     if(ReportImages[index]) {
@@ -574,21 +575,37 @@ function removeImage(index) {
 
 function ResetImages() {
     //Set all to No Photo attached...
-    $('#image_one').text('No Photo').css("font-style", "normal");
-    $('#image_two').text('No Photo').css("font-style", "normal");
-    $('#image_three').text('No Photo').css("font-style", "normal");
+    $('#image_one').text('Add Photo One').css("font-style", "normal");
+    $('#image_two').text('Add Photo Two').css("font-style", "normal");
+    $('#image_three').text('Add Photo Three').css("font-style", "normal");
 
     //Rebuild...
     for(var i=0;i< ReportImages.length;i++) {
             if(i==0) {
-                $('#image_one').text('Photo One').css("font-style", "bold");
+                $('#image_one').text('Photo One Added').css("font-style", "bold");
             }
             if(i==1) {
-                $('#image_two').text('Photo Two').css("font-style", "bold");
+                $('#image_two').text('Photo Two Added').css("font-style", "bold");
             }
             if(i==2) {
-                $('#image_three').text('Photo Three').css("font-style", "bold");
+                $('#image_three').text('Photo Three Added').css("font-style", "bold");
             }
+    }
+    $('#c0 span span').text("Add Caption");
+    $('#c1 span span').text("Add Caption");
+    $('#c2 span span').text("Add Caption");
+
+    //Rebuild...
+    for(var i=0;i< ReportCaptions.length;i++) {
+        if(i==0) {
+            $('#c0 span span').text(ReportCaptions[i]);
+        }
+        if(i==1) {
+            $('#c1 span span').text(ReportCaptions[i]);
+        }
+        if(i==2) {
+            $('#c2 span span').text(ReportCaptions[i]);
+        }
     }
 }
 
@@ -711,6 +728,7 @@ function saveCaption (none) {
     else {
         var text = $(document.getElementById('captiontext')).val();
         ReportCaptions[caption] = text;
+        $('#c'+ caption + ' span span').text(text);
         $(document.getElementById('captiontext')).val('');
     }
 }
@@ -1264,15 +1282,18 @@ function PracticesCheck(e) {
 
     <div id="MainWindow" data-role="content">
 
-            <a data-icon='arrow-r' style="margin-bottom:20px; text-shadow:none;font-weight:bold" id="Edit" href="#three" data-role="button">View Children</a>
-            <a data-icon='arrow-r' style="margin-bottom:20px; text-shadow:none;font-weight:bold" id="Add" href="#two" data-role="button">Add Child</a>
-            <a data-icon='arrow-r' style="margin-bottom:20px; text-shadow:none;font-weight:bold" id="Remove" href="#removestudent" data-role="button">Remove Child</a>
-            <a data-icon='arrow-r' style="margin-bottom:20px; text-shadow:none;font-weight:bold" id="" href="#teachersemail" data-role="button">Teacher's Email</a>
+        <!-- .center-button{
+margin: 0 auto;
+} WIL CENTER IT SET MAX-HEIGHT / MAX-WIDTH for MEDIA RULES ETC...
+-->
+
+        <a data-icon='arrow-r' style="margin-bottom:20px; text-shadow:none;font-weight:bold" id="Edit" href="#three" data-role="button">View Children</a>
+
+        <a data-icon='star' data-theme="h" style="margin-bottom:20px; text-shadow:none;font-weight:bold" id="" href="#teachersemail" data-role="button">Teacher's Email</a>
 
         <a data-icon='info' data-theme = "d" style="margin-bottom:20px;text-shadow:none;font-weight:bold" id="Notes" href="#capturenotes" data-role="button">Write Observations</a>
 
         <a data-icon='grid' data-theme = "a" style="margin-bottom:20px;text-shadow:none;font-weight:bold" onclick="onTermSelection('TermOne');" href="#ChooseStudentTerm"  data-role="button">Create Learning Story</a>
-
 
         <!-- START OF POPUPS -->
 
@@ -1384,7 +1405,7 @@ function PracticesCheck(e) {
 
         <div class="ui-grid-b" style="margin-top:30px">
             <div class="ui-block-a"></div>
-            <div class="ui-block-b"><a href="#one" data-direction="reverse" data-role="button" data-theme="i">Back</a></div>
+            <div class="ui-block-b"><a href="#three" data-direction="reverse" data-role="button" data-theme="i">Back</a></div>
         </div><!-- /grid-b -->
 
     </div><!-- /content -->
@@ -1403,6 +1424,11 @@ function PracticesCheck(e) {
         <ul id="editlist" data-role="listview" data-theme="b" style="margin-top:10px">
             <li data-theme="e" style="text-align:center;background-image:none; text-shadow:none; background-color:#9FADBF;"> My Children </li>
         </ul>
+
+        <div class="ui-grid-solo" style="margin-top:50px">
+            <a data-icon='plus' style="margin-bottom:30px; text-shadow:none;font-weight:bold" id="Add" href="#two" data-role="button">Add Child</a>
+            <a data-icon="delete" style="margin-bottom:0px; text-shadow:none;font-weight:bold" id="Remove" href="#removestudent" data-role="button">Remove Child</a>
+        </div>
 
         <div class="ui-grid-b" style="margin-top:30px">
             <div class="ui-block-a"></div>
@@ -1487,7 +1513,7 @@ function PracticesCheck(e) {
 
         <div class="ui-grid-b" style="margin-top:30px">
             <div class="ui-block-a"></div>
-            <div class="ui-block-b"><a href="#one" data-direction="reverse" data-role="button" data-theme="i">Back</a></div>
+            <div class="ui-block-b"><a href="#three" data-direction="reverse" data-role="button" data-theme="i">Back</a></div>
         </div><!-- /grid-b -->
 
     </div><!-- /content -->
@@ -1505,14 +1531,13 @@ function PracticesCheck(e) {
     <div data-role="content">
 
 
-        <fieldset class="ui-grid-a" style="">
-            <div class="ui-block-a"> <input id="Tinput" type="email" name="name" id="basic" value=""  placeholder="Teacher's Email" /></div>
-            <div class="ui-block-b"> <a style="margin-top:10px" onclick="UpdateTeacherEmail()" data-theme="i" data-mini="true" data-role="button" data-icon="check" data-inline="true">Update</a></div>
-        </fieldset>
+        <div class="ui-grid-solo" style="">
+            <input id="Tinput" type="email" name="name" id="basic" value=""  placeholder="Teacher's Email" data-inline="true" />
+        </div>
 
-        <div class="ui-grid-b" style="margin-top:30px">
-            <div class="ui-block-a"></div>
-            <div class="ui-block-b"><a href="#one" data-direction="reverse" data-role="button" data-theme="i">Back</a></div>
+        <div class="ui-grid-a" style="margin-top:30px">
+            <div class="ui-block-a"><a style="margin-top:10px" onclick="UpdateTeacherEmail()" data-theme="i" data-role="button" data-icon="check">Update</a></div>
+            <div class="ui-block-b"><a data-icon="delete" href="#one" data-direction="reverse" data-role="button" data-theme="i">Cancel</a></div>
         </div><!-- /grid-b -->
 
     </div><!-- /content -->
@@ -1790,16 +1815,18 @@ function PracticesCheck(e) {
     </div>
 
     <div class="ui-grid-b" style="margin-top:20px">
-        <div id="image_one" class="ui-block-a" style="text-overflow:ellipsis;overflow:hidden;height:40px;line-height:40px">None</div>
-        <div class="ui-block-b"><a style="text-shadow:none;font-weight:bold" onclick="caption=0; if(ReportImages[0]) {$.blockUI({ message: '<h4>Loading Captions...</h4>'});location.href='#addcaption'}else {navigator.notification.alert('Alert',function() {}, 'No photo to add caption for.','Close');}" data-role="button" data-mini="true" data-inline="true" data-theme="b">Caption</a></div>
+        <div id="image_one" class="ui-block-a" style="text-overflow:ellipsis;overflow:hidden;height:40px;line-height:40px">Add Photo One</div>
+        <div class="ui-block-b">
+            <a id="c0" style="text-shadow:none;font-weight:bold" onclick="caption=0; if(ReportImages[0]) {$.blockUI({ message: '<h4>Loading Captions...</h4>'});location.href='#addcaption'}else {navigator.notification.alert('Alert',function() {}, 'No photo to add caption for.','Close');}" data-role="button" data-mini="true" data-inline="true" data-theme="b">Add Caption</a>
+        </div>
         <div class="ui-block-c" style="height:40px;"><a style="text-shadow:none;font-weight:bold" onclick="if(ReportImages[0]) {removeImage(0);$.blockUI({ message: '<h4>Removing Image...</h4>'});}else { navigator.notification.alert('Alert',function() {}, 'No photo to remove.','Close'); }" data-role="button" data-mini="true" data-inline="true" data-theme="b" data-icon="delete" data-iconpos="notext"></a></div>
 
-        <div id="image_two" class="ui-block-a" style="text-overflow:ellipsis;height:40px;line-height:40px">None</div>
-        <div class="ui-block-b"><a style="text-shadow:none;font-weight:bold" onclick="caption=1; if(ReportImages[1]) {$.blockUI({ message: '<h4>Loading Captions...</h4>'});location.href='#addcaption'}else {navigator.notification.alert('Alert',function() {}, 'No photo to add caption for.','Close');}" data-role="button" data-mini="true" data-inline="true" data-theme="b">Caption</a></div>
+        <div id="image_two" class="ui-block-a" style="text-overflow:ellipsis;height:40px;line-height:40px">Add Photo Two</div>
+        <div class="ui-block-b"><a id="c1" style="text-shadow:none;font-weight:bold" onclick="caption=1; if(ReportImages[1]) {$.blockUI({ message: '<h4>Loading Captions...</h4>'});location.href='#addcaption'}else {navigator.notification.alert('Alert',function() {}, 'No photo to add caption for.','Close');}" data-role="button" data-mini="true" data-inline="true" data-theme="b">Add Caption</a></div>
         <div class="ui-block-c" style="height:40px;"><a style="text-shadow:none;font-weight:bold" onclick="if(ReportImages[1]) {removeImage(1);$.blockUI({ message: '<h4>Removing Image...</h4>'});}else { navigator.notification.alert('Alert',function() {}, 'No photo to remove.','Close'); }" data-role="button" data-mini="true" data-inline="true" data-theme="b" data-icon="delete" data-iconpos="notext"></a></div>
 
-        <div id="image_three" class="ui-block-a" style="text-overflow:ellipsis;height:40px;line-height:40px">None</div>
-        <div class="ui-block-b"><a style="text-shadow:none;font-weight:bold" onclick="caption=2; if(ReportImages[2]) {$.blockUI({ message: '<h4>Loading Captions...</h4>'});location.href='#addcaption'}else {navigator.notification.alert('Alert',function() {}, 'No photo to add caption for.','Close');}" data-role="button" data-mini="true" data-inline="true" data-theme="b">Caption</a></div>
+        <div id="image_three" class="ui-block-a" style="text-overflow:ellipsis;height:40px;line-height:40px">Add Photo Three</div>
+        <div class="ui-block-b"><a id="c2" style="text-shadow:none;font-weight:bold" onclick="caption=2; if(ReportImages[2]) {$.blockUI({ message: '<h4>Loading Captions...</h4>'});location.href='#addcaption'}else {navigator.notification.alert('Alert',function() {}, 'No photo to add caption for.','Close');}" data-role="button" data-mini="true" data-inline="true" data-theme="b">Add Caption</a></div>
         <div class="ui-block-c" style="height:40px;"><a style="text-shadow:none;font-weight:bold" onclick="if(ReportImages[2]) {removeImage(2);$.blockUI({ message: '<h4>Removing Image...</h4>'});}else { navigator.notification.alert('Alert',function() {}, 'No photo to remove.','Close'); }" data-role="button" data-mini="true" data-inline="true" data-theme="b" data-icon="delete" data-iconpos="notext"></a></div>
     </div><!-- /grid-b -->
 </div>
@@ -1925,31 +1952,31 @@ function PracticesCheck(e) {
     </div>
 </div>
 
-<div data-role="collapsible" data-collapsed = "true" data-theme = "e">
-    <h3>Follow Up Experience</h3>
-    <div data-role="fieldcontain">
-        <label for="followuptext"></label>
-        <textarea name="textarea" id="followuptext"></textarea>
+    <div data-role="collapsible" data-collapsed = "true" data-theme = "e">
+        <h3>Follow Up Experience</h3>
+        <div data-role="fieldcontain">
+            <label for="followuptext"></label>
+            <textarea name="textarea" id="followuptext"></textarea>
+        </div>
     </div>
-</div>
 
-<div data-role="collapsible" data-collapsed = "true" data-theme = "f">
-    <h3>Evaluation</h3>
-    <div data-role="fieldcontain">
-        <label for="evaluationtext"></label>
-        <textarea name="textarea" id="evaluationtext"></textarea>
+    <div data-role="collapsible" data-collapsed = "true" data-theme = "f">
+        <h3>Evaluation</h3>
+        <div data-role="fieldcontain">
+            <label for="evaluationtext"></label>
+            <textarea name="textarea" id="evaluationtext"></textarea>
+        </div>
     </div>
-</div>
 
-<div data-role="collapsible" data-collapsed = "true" data-theme = "h">
-    <h3>Style Options</h3>
+    <div data-role="collapsible" data-collapsed = "true" data-theme = "h">
+        <h3>Style Options</h3>
 
-    <div data-role="set">
-        <a href="#choosefont" data-role="button" data-rel="dialog" data-transition="pop" style="font-weight: bold;">Choose Font</a>
-        <a href="#choosefontcolour" data-role="button" data-rel="dialog" data-transition="pop" style="font-weight: bold;">Choose Font Colour</a>
-        <a href="#choosebackground" data-role="button" data-rel="dialog" data-transition="pop" style="font-weight: bold;">Choose Background</a>
+        <div data-role="set">
+            <a href="#choosebackground" data-role="button" data-rel="dialog" data-transition="pop" style="font-weight: bold;">Choose Background</a>
+            <a href="#choosefont" data-role="button" data-rel="dialog" data-transition="pop" style="font-weight: bold;">Choose Font</a>
+            <a href="#choosefontcolour" data-role="button" data-rel="dialog" data-transition="pop" style="font-weight: bold;">Choose Font Colour</a>
+        </div>
     </div>
-</div>
 </div>
 
 
