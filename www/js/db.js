@@ -128,7 +128,7 @@ function updateEmailSuccess(){
 function addTeacherSuccess(){
 
     navigator.notification.alert(
-        'Email Address Successfully Updated',  // message
+        'Teacher Email Address Successfully Updated',  // message
         function() {},         // callback
         'Email Updated',            // title
         'Close'                  // buttonName

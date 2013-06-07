@@ -57,18 +57,18 @@ function onDeviceReady() {
 function checkConnection() {
 
     if(navigator.connection) {
-    var networkState = navigator.connection.type;
+        var networkState = navigator.connection.type;
 
-    var states = {};
-    states[Connection.UNKNOWN]  = 'Unknown';
-    states[Connection.ETHERNET] = 'Network Detected';
-    states[Connection.WIFI]     = 'WiFi Detected';
-    states[Connection.CELL_2G]  = '2G Detected';
-    states[Connection.CELL_3G]  = '3G Detected';
-    states[Connection.CELL_4G]  = '4G Detected';
-    states[Connection.NONE]     = 'No Internet Detected';
+        var states = {};
+        states[Connection.UNKNOWN]  = 'Unknown';
+        states[Connection.ETHERNET] = 'Network Detected';
+        states[Connection.WIFI]     = 'WiFi Detected';
+        states[Connection.CELL_2G]  = '2G Detected';
+        states[Connection.CELL_3G]  = '3G Detected';
+        states[Connection.CELL_4G]  = '4G Detected';
+        states[Connection.NONE]     = 'No Internet Detected';
 
-    return states[networkState];
+        return states[networkState];
 
     }
     else {
@@ -192,16 +192,16 @@ function AttemptUpdateImage() {
 }
 
 /*
-function RemoveImage() {
+ function RemoveImage() {
 
-    //Copy of notes...
-    var clone = CurrentStudent.images.slice(0);
-    clone.splice(this.index,1);
-    CallbackData = clone;
-    UpdateStudentImagesCustomCallbackInDB(CurrentStudent.name, PrepDBData(clone), updateImageDeleteSuccess)
+ //Copy of notes...
+ var clone = CurrentStudent.images.slice(0);
+ clone.splice(this.index,1);
+ CallbackData = clone;
+ UpdateStudentImagesCustomCallbackInDB(CurrentStudent.name, PrepDBData(clone), updateImageDeleteSuccess)
 
-}
-*/
+ }
+ */
 //Used to display / delete student images
 function GenerateImageGrid() {
     if(CurrentStudent.name != "No Student Selected") {
@@ -553,11 +553,14 @@ function onSuccess(imageURI) {
 
 function removeImage(index) {
 
-    if(index == 0) { $('#image_one').text('No Photo').css("font-style", "normal");}
+    //Reset text on all images...
+    if(index == 0) { $('#image_one').text('Add Photo One').css("font-style", "normal");}
 
-    if(index == 1) {$('#image_two').text('No Photo').css("font-style", "normal");}
+    if(index == 1) {$('#image_two').text('Add Photo Two').css("font-style", "normal");}
 
-    if(index == 2) {$('#image_three').text('No Photo').css("font-style", "normal");}
+    if(index == 2) {$('#image_three').text('Add Photo Three').css("font-style", "normal");}
+
+    var currLength = ReportImages.length;
 
     //Fix array...
     if(ReportImages[index]) {
@@ -575,21 +578,37 @@ function removeImage(index) {
 
 function ResetImages() {
     //Set all to No Photo attached...
-    $('#image_one').text('No Photo').css("font-style", "normal");
-    $('#image_two').text('No Photo').css("font-style", "normal");
-    $('#image_three').text('No Photo').css("font-style", "normal");
+    $('#image_one').text('Add Photo One').css("font-style", "normal");
+    $('#image_two').text('Add Photo Two').css("font-style", "normal");
+    $('#image_three').text('Add Photo Three').css("font-style", "normal");
 
     //Rebuild...
     for(var i=0;i< ReportImages.length;i++) {
-            if(i==0) {
-                $('#image_one').text('Photo One').css("font-style", "bold");
-            }
-            if(i==1) {
-                $('#image_two').text('Photo Two').css("font-style", "bold");
-            }
-            if(i==2) {
-                $('#image_three').text('Photo Three').css("font-style", "bold");
-            }
+        if(i==0) {
+            $('#image_one').text('Photo One Added').css("font-style", "bold");
+        }
+        if(i==1) {
+            $('#image_two').text('Photo Two Added').css("font-style", "bold");
+        }
+        if(i==2) {
+            $('#image_three').text('Photo Three Added').css("font-style", "bold");
+        }
+    }
+    $('#c0 span span').text("Add Caption");
+    $('#c1 span span').text("Add Caption");
+    $('#c2 span span').text("Add Caption");
+
+    //Rebuild...
+    for(var i=0;i< ReportCaptions.length;i++) {
+        if(i==0) {
+            $('#c0 span span').text(ReportCaptions[i]);
+        }
+        if(i==1) {
+            $('#c1 span span').text(ReportCaptions[i]);
+        }
+        if(i==2) {
+            $('#c2 span span').text(ReportCaptions[i]);
+        }
     }
 }
 
@@ -697,21 +716,22 @@ function onTemplateClick(template) {
 function saveCaption (none) {
 
     CaptionLoading = false;
-/*
-    if(none) { ReportCheckBoxesCaption.push("");}
-    else {
-        var text = $(document.getElementById('captiontext')).val();
-        CurrentCaptionElement.setAttribute("caption",text);
-        ReportCheckBoxesCaption.push(text);
-        $(document.getElementById('captiontext')).val('');
-    }
-*/
-   CaptionLoading = false;
+    /*
+     if(none) { ReportCheckBoxesCaption.push("");}
+     else {
+     var text = $(document.getElementById('captiontext')).val();
+     CurrentCaptionElement.setAttribute("caption",text);
+     ReportCheckBoxesCaption.push(text);
+     $(document.getElementById('captiontext')).val('');
+     }
+     */
+    CaptionLoading = false;
 
     if(none) { ReportCheckBoxesCaption[caption] = "";}
     else {
         var text = $(document.getElementById('captiontext')).val();
         ReportCaptions[caption] = text;
+        $('#c'+ caption + ' span span').text(text);
         $(document.getElementById('captiontext')).val('');
     }
 }
@@ -1520,7 +1540,7 @@ margin: 0 auto;
 
         <div class="ui-grid-a" style="margin-top:30px">
             <div class="ui-block-a"><a style="margin-top:10px" onclick="UpdateTeacherEmail()" data-theme="i" data-role="button" data-icon="check">Update</a></div>
-            <div class="ui-block-b"><a data-icon="delete" href="#one" data-direction="reverse" data-role="button" data-theme="i">Cancel</a></div>
+            <div class="ui-block-b"><a data-icon="delete" href="#one" data-direction="reverse" data-role="button" data-theme="i">Back</a></div>
         </div><!-- /grid-b -->
 
     </div><!-- /content -->
@@ -1774,118 +1794,120 @@ margin: 0 auto;
 
 <div data-role="content">
 
-<div data-role="collapsible" data-collapsed="true" data-theme = "a">
-    <h3>Title & Date</h3>
+    <div data-role="collapsible" data-collapsed="true" data-theme = "a">
+        <h3>Title & Date</h3>
 
-    <div data-role="controlgroup">
         <div data-role="controlgroup">
-            <div data-role="fieldcontain">
-                <input style="" placeholder="Report Title" data-inline="true" type="text" name="name" id="ReportTitle" value=""  />
-            </div>
-
-            <div data-role="fieldcontain">
-                <input type="text" name="date" id="ReportDate" value=""  class="ui-input-text ui-body-c ui-corner-all ui-shadow-inset" placeholder="DD/MM/YYYY">
-            </div>
-        </div>
-    </div>
-</div>
-
-<div data-role="collapsible" data-collapsed = "true" data-theme = "b">
-    <h3>Choose Images</h3>
-
-    <div class="ui-grid-solo" style="margin-top:30px">
-        <div class="ui-block-a"><a style="text-shadow:none;font-weight:bold" data-role="button" data-theme="i" onclick="StartCamera()">Add Photo</a></div>
-    </div>
-
-    <div class="ui-grid-b" style="margin-top:20px">
-        <div id="image_one" class="ui-block-a" style="text-overflow:ellipsis;overflow:hidden;height:40px;line-height:40px">None</div>
-        <div class="ui-block-b"><a style="text-shadow:none;font-weight:bold" onclick="caption=0; if(ReportImages[0]) {$.blockUI({ message: '<h4>Loading Captions...</h4>'});location.href='#addcaption'}else {navigator.notification.alert('Alert',function() {}, 'No photo to add caption for.','Close');}" data-role="button" data-mini="true" data-inline="true" data-theme="b">Add Caption</a></div>
-        <div class="ui-block-c" style="height:40px;"><a style="text-shadow:none;font-weight:bold" onclick="if(ReportImages[0]) {removeImage(0);$.blockUI({ message: '<h4>Removing Image...</h4>'});}else { navigator.notification.alert('Alert',function() {}, 'No photo to remove.','Close'); }" data-role="button" data-mini="true" data-inline="true" data-theme="b" data-icon="delete" data-iconpos="notext"></a></div>
-
-        <div id="image_two" class="ui-block-a" style="text-overflow:ellipsis;height:40px;line-height:40px">None</div>
-        <div class="ui-block-b"><a style="text-shadow:none;font-weight:bold" onclick="caption=1; if(ReportImages[1]) {$.blockUI({ message: '<h4>Loading Captions...</h4>'});location.href='#addcaption'}else {navigator.notification.alert('Alert',function() {}, 'No photo to add caption for.','Close');}" data-role="button" data-mini="true" data-inline="true" data-theme="b">Add Caption</a></div>
-        <div class="ui-block-c" style="height:40px;"><a style="text-shadow:none;font-weight:bold" onclick="if(ReportImages[1]) {removeImage(1);$.blockUI({ message: '<h4>Removing Image...</h4>'});}else { navigator.notification.alert('Alert',function() {}, 'No photo to remove.','Close'); }" data-role="button" data-mini="true" data-inline="true" data-theme="b" data-icon="delete" data-iconpos="notext"></a></div>
-
-        <div id="image_three" class="ui-block-a" style="text-overflow:ellipsis;height:40px;line-height:40px">None</div>
-        <div class="ui-block-b"><a style="text-shadow:none;font-weight:bold" onclick="caption=2; if(ReportImages[2]) {$.blockUI({ message: '<h4>Loading Captions...</h4>'});location.href='#addcaption'}else {navigator.notification.alert('Alert',function() {}, 'No photo to add caption for.','Close');}" data-role="button" data-mini="true" data-inline="true" data-theme="b">Add Caption</a></div>
-        <div class="ui-block-c" style="height:40px;"><a style="text-shadow:none;font-weight:bold" onclick="if(ReportImages[2]) {removeImage(2);$.blockUI({ message: '<h4>Removing Image...</h4>'});}else { navigator.notification.alert('Alert',function() {}, 'No photo to remove.','Close'); }" data-role="button" data-mini="true" data-inline="true" data-theme="b" data-icon="delete" data-iconpos="notext"></a></div>
-    </div><!-- /grid-b -->
-</div>
-
-<div data-role="collapsible" data-collapsed = "true" data-theme = "c">
-    <h3>Observations</h3>
-
-    <ul id="ReportNotes" data-role="listview" data-theme="b" style="margin-top:10px;margin-bottom: 10px">
-    </ul>
-</div>
-
-<div data-role="collapsible" data-collapsed = "true" data-theme = "d">
-    <h3>Learning Outcomes</h3>
-
-
-    <div data-role="collapsible" data-collapsed = "true" data-theme = "d">
-        <h3>Early Years Learning Framework Outcomes</h3>
-        <div data-role="collapsible-set">
-            <div data-role="collapsible" data-collapsed = "true" data-theme = "c">
-                <h3 style="white-space:normal">Outcome One: Children have a strong sense of identity</h3>
-                <div data-role="collapsible-set">
-                    <ul data-role="listview" data-theme="i">
-                        <li ><a onclick="onSelectOutcome('EYLF','OutcomeOneA')" style="white-space:normal">Children feel safe, secure, and supported</a></li>
-                        <li><a onclick="onSelectOutcome('EYLF','OutcomeOneB')" style="white-space:normal">Children develop their emerging autonomy, inter-dependence, resilience and sense of agency</a></li>
-                        <li><a onclick="onSelectOutcome('EYLF','OutcomeOneC')" style="white-space:normal">Children develop knowledgeable and confident self identities</a></li>
-                        <li><a onclick="onSelectOutcome('EYLF','OutcomeOneD')" style="white-space:normal" >Children learn to interact in relation to others with care, empathy and respect</a></li>
-                    </ul>
-                </div>
-            </div>
-            <div data-role="collapsible" data-collapsed = "true" data-theme = "c">
-                <h3>Outcome Two: Children are connected with and contribute to their world</h3>
-                <div data-role="collapsible-set">
-                    <ul data-role="listview" data-theme="i">
-                        <li><a onclick="onSelectOutcome('EYLF','OutcomeTwoA')" style="white-space:normal">Children develop a sense of belonging to groups and communities and an understanding of the reciprocal rights and responsibilities necessary for active community participation </a></li>
-                        <li><a onclick="onSelectOutcome('EYLF','OutcomeTwoB')" style="white-space:normal">Children respond to diversity with respect</a></li>
-                        <li><a onclick="onSelectOutcome('EYLF','OutcomeTwoC')" style="white-space:normal">Children become aware of fairness </a></li>
-                        <li><a onclick="onSelectOutcome('EYLF','OutcomeTwoD')" style="white-space:normal">Children become socially responsible and show respect for the environment</a></li>
-                    </ul>
+            <div data-role="controlgroup">
+                <div data-role="fieldcontain">
+                    <input style="" placeholder="Report Title" data-inline="true" type="text" name="name" id="ReportTitle" value=""  />
                 </div>
 
-            </div>
-            <div data-role="collapsible" data-collapsed = "true" data-theme = "c">
-                <h3>Outcome Three: Children have a strong sense of well being</h3>
-                <div data-role="collapsible-set">
-                    <ul data-role="listview" data-theme="i">
-                        <li><a onclick="onSelectOutcome('EYLF','OutcomeThreeA')" style="white-space:normal">Children become strong in their social and emotional wellbeing</a></li>
-                        <li><a onclick="onSelectOutcome('EYLF','OutcomeThreeB')" style="white-space:normal">Children take increasing responsibility for their own health and physical wellbeing</a></li>
-                    </ul>
-                </div>
-            </div>
-            <div data-role="collapsible" data-collapsed = "true" data-theme = "c">
-                <h3>Outcome Four: Children are confident and involved learners</h3>
-                <div data-role="collapsible-set">
-                    <ul data-role="listview" data-theme="i">
-                        <li><a onclick="onSelectOutcome('EYLF','OutcomeFourA')" style="white-space:normal">Children develop dispositions for learning such as curiosity, cooperation, confidence, creativity, commitment, enthusiasm, persistence, imagination and reflexivity </a></li>
-                        <li><a onclick="onSelectOutcome('EYLF','OutcomeFourB')" style="white-space:normal">Children develop a range of skills and processes such as problem solving, enquiry, experimentation, hypothesising, researching and investigating</a></li>
-                        <li><a onclick="onSelectOutcome('EYLF','OutcomeFourC')" style="white-space:normal">Children transfer and adapt what they have learned from one context to another</a></li>
-                        <li><a onclick="onSelectOutcome('EYLF','OutcomeFourD')" style="white-space:normal">Children resource their own learning through connecting with people, place, technologies and natural and processed materials</a></li>
-                    </ul>
-                </div>
-            </div>
-            <div data-role="collapsible" data-collapsed = "true" data-theme = "c">
-                <h3>Outcome Five: Children are effective communicators</h3>
-                <div data-role="collapsible-set">
-                    <ul data-role="listview" data-theme="i">
-                        <li><a onclick="onSelectOutcome('EYLF','OutcomeFiveA')" style="white-space:normal">Children interact verbally and non-verbally with others for a range of purposes </a></li>
-                        <li><a onclick="onSelectOutcome('EYLF','OutcomeFiveB')" style="white-space:normal">Children engage with a range of texts and gain meaning from these texts </a></li>
-                        <li><a onclick="onSelectOutcome('EYLF','OutcomeFiveC')" style="white-space:normal">Children express ideas and make meaning using a range of media</a></li>
-                        <li><a onclick="onSelectOutcome('EYLF','OutcomeFiveD')" style="white-space:normal">Children begin to understand how symbols and pattern systems work</a></li>
-                        <li><a onclick="onSelectOutcome('EYLF','OutcomeFiveE')" style="white-space:normal">Children use information and communication technologies to access information, investigate ideas and represent their thinking</a></li>
-                    </ul>
+                <div data-role="fieldcontain">
+                    <input type="text" name="date" id="ReportDate" value=""  class="ui-input-text ui-body-c ui-corner-all ui-shadow-inset" placeholder="DD/MM/YYYY">
                 </div>
             </div>
         </div>
     </div>
+
+    <div data-role="collapsible" data-collapsed = "true" data-theme = "b">
+        <h3>Choose Images</h3>
+
+        <div class="ui-grid-solo" style="margin-top:30px">
+            <div class="ui-block-a"><a style="text-shadow:none;font-weight:bold" data-role="button" data-theme="i" onclick="StartCamera()">Add Photo</a></div>
+        </div>
+
+        <div class="ui-grid-b" style="margin-top:20px">
+            <div id="image_one" class="ui-block-a" style="text-overflow:ellipsis;overflow:hidden;height:40px;line-height:40px">Add Photo One</div>
+            <div class="ui-block-b">
+                <a id="c0" style="text-shadow:none;font-weight:bold" onclick="caption=0; if(ReportImages[0]) {$.blockUI({ message: '<h4>Loading Captions...</h4>'});location.href='#addcaption'}else {navigator.notification.alert('Alert',function() {}, 'No photo to add caption for.','Close');}" data-role="button" data-mini="true" data-inline="true" data-theme="b">Add Caption</a>
+            </div>
+            <div class="ui-block-c" style="height:40px;"><a style="text-shadow:none;font-weight:bold" onclick="if(ReportImages[0]) {removeImage(0);$.blockUI({ message: '<h4>Removing Image...</h4>'});}else { navigator.notification.alert('Alert',function() {}, 'No photo to remove.','Close'); }" data-role="button" data-mini="true" data-inline="true" data-theme="b" data-icon="delete" data-iconpos="notext"></a></div>
+
+            <div id="image_two" class="ui-block-a" style="text-overflow:ellipsis;height:40px;line-height:40px">Add Photo Two</div>
+            <div class="ui-block-b"><a id="c1" style="text-shadow:none;font-weight:bold" onclick="caption=1; if(ReportImages[1]) {$.blockUI({ message: '<h4>Loading Captions...</h4>'});location.href='#addcaption'}else {navigator.notification.alert('Alert',function() {}, 'No photo to add caption for.','Close');}" data-role="button" data-mini="true" data-inline="true" data-theme="b">Add Caption</a></div>
+            <div class="ui-block-c" style="height:40px;"><a style="text-shadow:none;font-weight:bold" onclick="if(ReportImages[1]) {removeImage(1);$.blockUI({ message: '<h4>Removing Image...</h4>'});}else { navigator.notification.alert('Alert',function() {}, 'No photo to remove.','Close'); }" data-role="button" data-mini="true" data-inline="true" data-theme="b" data-icon="delete" data-iconpos="notext"></a></div>
+
+            <div id="image_three" class="ui-block-a" style="text-overflow:ellipsis;height:40px;line-height:40px">Add Photo Three</div>
+            <div class="ui-block-b"><a id="c2" style="text-shadow:none;font-weight:bold" onclick="caption=2; if(ReportImages[2]) {$.blockUI({ message: '<h4>Loading Captions...</h4>'});location.href='#addcaption'}else {navigator.notification.alert('Alert',function() {}, 'No photo to add caption for.','Close');}" data-role="button" data-mini="true" data-inline="true" data-theme="b">Add Caption</a></div>
+            <div class="ui-block-c" style="height:40px;"><a style="text-shadow:none;font-weight:bold" onclick="if(ReportImages[2]) {removeImage(2);$.blockUI({ message: '<h4>Removing Image...</h4>'});}else { navigator.notification.alert('Alert',function() {}, 'No photo to remove.','Close'); }" data-role="button" data-mini="true" data-inline="true" data-theme="b" data-icon="delete" data-iconpos="notext"></a></div>
+        </div><!-- /grid-b -->
+    </div>
+
+    <div data-role="collapsible" data-collapsed = "true" data-theme = "c">
+        <h3>Observations</h3>
+
+        <ul id="ReportNotes" data-role="listview" data-theme="b" style="margin-top:10px;margin-bottom: 10px">
+        </ul>
+    </div>
+
     <div data-role="collapsible" data-collapsed = "true" data-theme = "d">
-        <h3>EYLF Principles</h3>
-        <div data-role="collapsible-set">
+        <h3>Learning Outcomes</h3>
+
+
+        <div data-role="collapsible" data-collapsed = "true" data-theme = "d">
+            <h3>Early Years Learning Framework Outcomes</h3>
+            <div data-role="collapsible-set">
+                <div data-role="collapsible" data-collapsed = "true" data-theme = "c">
+                    <h3 style="white-space:normal">Outcome One: Children have a strong sense of identity</h3>
+                    <div data-role="collapsible-set">
+                        <ul data-role="listview" data-theme="i">
+                            <li ><a onclick="onSelectOutcome('EYLF','OutcomeOneA')" style="white-space:normal">Children feel safe, secure, and supported</a></li>
+                            <li><a onclick="onSelectOutcome('EYLF','OutcomeOneB')" style="white-space:normal">Children develop their emerging autonomy, inter-dependence, resilience and sense of agency</a></li>
+                            <li><a onclick="onSelectOutcome('EYLF','OutcomeOneC')" style="white-space:normal">Children develop knowledgeable and confident self identities</a></li>
+                            <li><a onclick="onSelectOutcome('EYLF','OutcomeOneD')" style="white-space:normal" >Children learn to interact in relation to others with care, empathy and respect</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div data-role="collapsible" data-collapsed = "true" data-theme = "c">
+                    <h3>Outcome Two: Children are connected with and contribute to their world</h3>
+                    <div data-role="collapsible-set">
+                        <ul data-role="listview" data-theme="i">
+                            <li><a onclick="onSelectOutcome('EYLF','OutcomeTwoA')" style="white-space:normal">Children develop a sense of belonging to groups and communities and an understanding of the reciprocal rights and responsibilities necessary for active community participation </a></li>
+                            <li><a onclick="onSelectOutcome('EYLF','OutcomeTwoB')" style="white-space:normal">Children respond to diversity with respect</a></li>
+                            <li><a onclick="onSelectOutcome('EYLF','OutcomeTwoC')" style="white-space:normal">Children become aware of fairness </a></li>
+                            <li><a onclick="onSelectOutcome('EYLF','OutcomeTwoD')" style="white-space:normal">Children become socially responsible and show respect for the environment</a></li>
+                        </ul>
+                    </div>
+
+                </div>
+                <div data-role="collapsible" data-collapsed = "true" data-theme = "c">
+                    <h3>Outcome Three: Children have a strong sense of well being</h3>
+                    <div data-role="collapsible-set">
+                        <ul data-role="listview" data-theme="i">
+                            <li><a onclick="onSelectOutcome('EYLF','OutcomeThreeA')" style="white-space:normal">Children become strong in their social and emotional wellbeing</a></li>
+                            <li><a onclick="onSelectOutcome('EYLF','OutcomeThreeB')" style="white-space:normal">Children take increasing responsibility for their own health and physical wellbeing</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div data-role="collapsible" data-collapsed = "true" data-theme = "c">
+                    <h3>Outcome Four: Children are confident and involved learners</h3>
+                    <div data-role="collapsible-set">
+                        <ul data-role="listview" data-theme="i">
+                            <li><a onclick="onSelectOutcome('EYLF','OutcomeFourA')" style="white-space:normal">Children develop dispositions for learning such as curiosity, cooperation, confidence, creativity, commitment, enthusiasm, persistence, imagination and reflexivity </a></li>
+                            <li><a onclick="onSelectOutcome('EYLF','OutcomeFourB')" style="white-space:normal">Children develop a range of skills and processes such as problem solving, enquiry, experimentation, hypothesising, researching and investigating</a></li>
+                            <li><a onclick="onSelectOutcome('EYLF','OutcomeFourC')" style="white-space:normal">Children transfer and adapt what they have learned from one context to another</a></li>
+                            <li><a onclick="onSelectOutcome('EYLF','OutcomeFourD')" style="white-space:normal">Children resource their own learning through connecting with people, place, technologies and natural and processed materials</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div data-role="collapsible" data-collapsed = "true" data-theme = "c">
+                    <h3>Outcome Five: Children are effective communicators</h3>
+                    <div data-role="collapsible-set">
+                        <ul data-role="listview" data-theme="i">
+                            <li><a onclick="onSelectOutcome('EYLF','OutcomeFiveA')" style="white-space:normal">Children interact verbally and non-verbally with others for a range of purposes </a></li>
+                            <li><a onclick="onSelectOutcome('EYLF','OutcomeFiveB')" style="white-space:normal">Children engage with a range of texts and gain meaning from these texts </a></li>
+                            <li><a onclick="onSelectOutcome('EYLF','OutcomeFiveC')" style="white-space:normal">Children express ideas and make meaning using a range of media</a></li>
+                            <li><a onclick="onSelectOutcome('EYLF','OutcomeFiveD')" style="white-space:normal">Children begin to understand how symbols and pattern systems work</a></li>
+                            <li><a onclick="onSelectOutcome('EYLF','OutcomeFiveE')" style="white-space:normal">Children use information and communication technologies to access information, investigate ideas and represent their thinking</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div data-role="collapsible" data-collapsed = "true" data-theme = "d">
+            <h3>EYLF Principles</h3>
+            <div data-role="collapsible-set">
                 <input type="checkbox" name="checkbox-1" id="checkbox-1" class="custom" onclick="PrinciplesCheck(event)" />
                 <label for="checkbox-1">Secure, respectful and reciprocal relationships</label>
 
@@ -1901,63 +1923,63 @@ margin: 0 auto;
                 <input type="checkbox" name="checkbox-5" id="checkbox-5" class="custom" onclick="PrinciplesCheck(event)" />
                 <label for="checkbox-5">Ongoing learning and reflective practice</label>
 
+            </div>
+        </div>
+        <div data-role="collapsible" data-collapsed = "true" data-theme = "d">
+            <h3>EYLF Practices</h3>
+            <div data-role="collapsible-set">
+                <input type="checkbox" name="checkbox-a" id="checkbox-a" class="custom" onclick="PracticesCheck(event)" />
+                <label for="checkbox-a">Adopting holistic approaches</label>
+
+                <input type="checkbox" name="checkbox-b" id="checkbox-b" class="custom" onclick="PracticesCheck(event)" />
+                <label for="checkbox-b">Responsiveness to children</label>
+
+                <input type="checkbox" name="checkbox-c" id="checkbox-c" class="custom" onclick="PracticesCheck(event)" />
+                <label for="checkbox-c"> Learning through play</label>
+
+                <input type="checkbox" name="checkbox-d" id="checkbox-d" class="custom" onclick="PracticesCheck(event)" />
+                <label for="checkbox-d">Intentional teaching</label>
+
+                <input type="checkbox" name="checkbox-e" id="checkbox-e" class="custom" onclick="PracticesCheck(event)" />
+                <label for="checkbox-e">Learning environments</label>
+
+                <input type="checkbox" name="checkbox-f" id="checkbox-f" class="custom" onclick="PracticesCheck(event)" />
+                <label for="checkbox-f">Cultural competence</label>
+
+                <input type="checkbox" name="checkbox-g" id="checkbox-g" class="custom" onclick="PracticesCheck(event)" />
+                <label for="checkbox-g">Continuity of learning and transitions</label>
+
+                <input type="checkbox" name="checkbox-h" id="checkbox-h" class="custom" onclick="PracticesCheck(event)" />
+                <label for="checkbox-h">Assessment for learning</label>
+            </div>
         </div>
     </div>
-    <div data-role="collapsible" data-collapsed = "true" data-theme = "d">
-        <h3>EYLF Practices</h3>
-        <div data-role="collapsible-set">
-                    <input type="checkbox" name="checkbox-a" id="checkbox-a" class="custom" onclick="PracticesCheck(event)" />
-                    <label for="checkbox-a">Adopting holistic approaches</label>
 
-                    <input type="checkbox" name="checkbox-b" id="checkbox-b" class="custom" onclick="PracticesCheck(event)" />
-                    <label for="checkbox-b">Responsiveness to children</label>
-
-                    <input type="checkbox" name="checkbox-c" id="checkbox-c" class="custom" onclick="PracticesCheck(event)" />
-                    <label for="checkbox-c"> Learning through play</label>
-
-                    <input type="checkbox" name="checkbox-d" id="checkbox-d" class="custom" onclick="PracticesCheck(event)" />
-                    <label for="checkbox-d">Intentional teaching</label>
-
-                    <input type="checkbox" name="checkbox-e" id="checkbox-e" class="custom" onclick="PracticesCheck(event)" />
-                    <label for="checkbox-e">Learning environments</label>
-
-                    <input type="checkbox" name="checkbox-f" id="checkbox-f" class="custom" onclick="PracticesCheck(event)" />
-                    <label for="checkbox-f">Cultural competence</label>
-
-                    <input type="checkbox" name="checkbox-g" id="checkbox-g" class="custom" onclick="PracticesCheck(event)" />
-                    <label for="checkbox-g">Continuity of learning and transitions</label>
-
-                    <input type="checkbox" name="checkbox-h" id="checkbox-h" class="custom" onclick="PracticesCheck(event)" />
-                    <label for="checkbox-h">Assessment for learning</label>
+    <div data-role="collapsible" data-collapsed = "true" data-theme = "e">
+        <h3>Follow Up Experience</h3>
+        <div data-role="fieldcontain">
+            <label for="followuptext"></label>
+            <textarea name="textarea" id="followuptext"></textarea>
         </div>
     </div>
-</div>
 
-<div data-role="collapsible" data-collapsed = "true" data-theme = "e">
-    <h3>Follow Up Experience</h3>
-    <div data-role="fieldcontain">
-        <label for="followuptext"></label>
-        <textarea name="textarea" id="followuptext"></textarea>
+    <div data-role="collapsible" data-collapsed = "true" data-theme = "f">
+        <h3>Evaluation</h3>
+        <div data-role="fieldcontain">
+            <label for="evaluationtext"></label>
+            <textarea name="textarea" id="evaluationtext"></textarea>
+        </div>
     </div>
-</div>
 
-<div data-role="collapsible" data-collapsed = "true" data-theme = "f">
-    <h3>Evaluation</h3>
-    <div data-role="fieldcontain">
-        <label for="evaluationtext"></label>
-        <textarea name="textarea" id="evaluationtext"></textarea>
+    <div data-role="collapsible" data-collapsed = "true" data-theme = "h">
+        <h3>Style Options</h3>
+
+        <div data-role="set">
+            <a href="#choosebackground" data-role="button" data-rel="dialog" data-transition="pop" style="font-weight: bold;">Choose Background</a>
+            <a href="#choosefont" data-role="button" data-rel="dialog" data-transition="pop" style="font-weight: bold;">Choose Font</a>
+            <a href="#choosefontcolour" data-role="button" data-rel="dialog" data-transition="pop" style="font-weight: bold;">Choose Font Colour</a>
+        </div>
     </div>
-</div>
-
-<div data-role="collapsible" data-collapsed = "true" data-theme = "h">
-    <h3>Style Options</h3>
-
-    <div data-role="set">
-        <a href="#choosefont" data-role="button" data-rel="dialog" data-transition="pop" style="font-weight: bold;">Choose Font</a>
-        <a href="#choosefontcolour" data-role="button" data-rel="dialog" data-transition="pop" style="font-weight: bold;">Choose Font Colour</a>
-        <a href="#choosebackground" data-role="button" data-rel="dialog" data-transition="pop" style="font-weight: bold;">Choose Background</a>
-    </div>
-</div>
 </div>
 
 
@@ -2051,20 +2073,20 @@ margin: 0 auto;
                 </li>
                 <li style="cursor:pointer" onclick="SelectedFont = 'B';document.getElementById('fontClose').click();">
                     <a>
-                    <h3 style="font-family:fantasy">Fantasy</h3>
-                    <p style="font-family:fantasy">Click here to select this font</p>
+                        <h3 style="font-family:fantasy">Fantasy</h3>
+                        <p style="font-family:fantasy">Click here to select this font</p>
                     </a>
                 </li>
                 <li style="cursor:pointer" onclick="SelectedFont = 'C';document.getElementById('fontClose').click();">
                     <a>
-                    <h3 style="font-family:helvetica">Helvetica</h3>
-                    <p style="font-family:helvetica">Click here to select this font</p>
+                        <h3 style="font-family:helvetica">Helvetica</h3>
+                        <p style="font-family:helvetica">Click here to select this font</p>
                     </a>
                 </li>
                 <li style="cursor:pointer" onclick="SelectedFont = 'D';document.getElementById('fontClose').click();">
                     <a>
-                    <h3 style="font-family:palatino">Palatino</h3>
-                    <p style="font-family:palatino">Click here to select this font</p>
+                        <h3 style="font-family:palatino">Palatino</h3>
+                        <p style="font-family:palatino">Click here to select this font</p>
                     </a>
                 </li>
             </ul>
@@ -2194,51 +2216,51 @@ margin: 0 auto;
 
 
         /*
-        //Set Email Values
-        $("#eInputReport").val(CurrentStudent.Parent);
-        $("#TRinput").val(Globals.teacher);
+         //Set Email Values
+         $("#eInputReport").val(CurrentStudent.Parent);
+         $("#TRinput").val(Globals.teacher);
 
-        //Set Title
-        $("#ReportTitle").val(CurrentStudent.name + "'s Learning Story");
+         //Set Title
+         $("#ReportTitle").val(CurrentStudent.name + "'s Learning Story");
 
-        //Set Date
-        var today = new Date();
-        var dd = today.getDate();
-        var mm = today.getMonth()+1;
-        var yyyy = today.getFullYear();
-        if(dd<10){dd='0'+dd}
-        if(mm<10){mm='0'+mm}
-        today = dd +'/'+mm+'/'+yyyy;
-        $("#ReportDate").val(today);
+         //Set Date
+         var today = new Date();
+         var dd = today.getDate();
+         var mm = today.getMonth()+1;
+         var yyyy = today.getFullYear();
+         if(dd<10){dd='0'+dd}
+         if(mm<10){mm='0'+mm}
+         today = dd +'/'+mm+'/'+yyyy;
+         $("#ReportDate").val(today);
 
-        //Restore Style Defaults
-        SelectedBackground = "E";
-        SelectedFont = "A";
-        SelectedFontColour = "A";
+         //Restore Style Defaults
+         SelectedBackground = "E";
+         SelectedFont = "A";
+         SelectedFontColour = "A";
 
-        //Clear Evaluation & Followup
-        $("#followuptext").val("");
-        $("#evaluationtext").val("");
+         //Clear Evaluation & Followup
+         $("#followuptext").val("");
+         $("#evaluationtext").val("");
 
-        //Clear Principles & Practices
-        $("input[type='checkbox']").attr("checked",false).checkboxradio("refresh");
-        SelectedPractices = [];
-        SelectedPrinciples = [];
+         //Clear Principles & Practices
+         $("input[type='checkbox']").attr("checked",false).checkboxradio("refresh");
+         SelectedPractices = [];
+         SelectedPrinciples = [];
 
-        //Clear Outcomes
-        ReportOutcomes = [];
+         //Clear Outcomes
+         ReportOutcomes = [];
 
-        //Clear Notes
-        ReportCheckBoxesNotes = [];
-        $('#ReportNotes').empty();
-        GenerateReportNotes();
+         //Clear Notes
+         ReportCheckBoxesNotes = [];
+         $('#ReportNotes').empty();
+         GenerateReportNotes();
 
-        //Clear Images
-        ReportCheckBoxesCaption = [];
-        ReportCheckBoxesImages = [];
-        $('#ReportImages').empty();
-        GenerateReportImageGrid();
-        */
+         //Clear Images
+         ReportCheckBoxesCaption = [];
+         ReportCheckBoxesImages = [];
+         $('#ReportImages').empty();
+         GenerateReportImageGrid();
+         */
         $.unblockUI();
         var holder = $("#data-connection").text(checkConnection());
         $("#TRinput").val(Globals.teacher);
