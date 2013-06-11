@@ -37,7 +37,7 @@ function Email(title,date,images,captions,notes,followupexperience,evaluation,ty
 
     //Format Notes
     for(var i=0; i<notes.length;i++) {
-        this.fnotes+= '<li style="margin-left:1em;">' + notes[i] + '</li>';
+        this.fnotes+= '<p style="margin-left:1em;">' + notes[i] + '</p>';
     }
 
     //Format practices & principles
@@ -262,14 +262,14 @@ Email.prototype.GenerateEmail = function(template) {
         }
 
         if(this.fstring != "") {
-            this.EmailString+='<th width="'+ width + '%" colspan="1" align="center">Learning Outcomes</th>'
+            this.EmailString+='<th width="'+ width + '%" colspan="1" align="center">Early Years Learning Framework Outcomes</th>'
         }
 
         //Now do for TDs
         this.EmailString+= '</tr><tr valign="top">';
 
         if(this.fnotes != "") {
-            this.EmailString+='<td width="'+ width + '%" colspan="1" align=""><ul style="font-size:12px">'+ this.fnotes +'</ul></td>';
+            this.EmailString+='<td width="'+ width + '%" colspan="1" align=""><div style="font-size:12px">'+ this.fnotes +'</div></td>';
         }
 
         if(this.evaluation != "" || this.follow !="") {
@@ -298,7 +298,7 @@ Email.prototype.GenerateEmail = function(template) {
         if(this.fnotes != "") {
             this.EmailString+='<div id="floats" class="plzfloat" style="width:600px;float:left;margin-bottom:10px;">'+
                 '<p style="text-align:center;font-weight:bold">Observations</p>'+
-                '<ul style="font-size:12px">'+ this.fnotes +'</ul></div>';
+                '<div style="font-size:12px">'+ this.fnotes +'</div></div>';
         }
 
         if(this.evaluation != "") {
@@ -316,7 +316,7 @@ Email.prototype.GenerateEmail = function(template) {
 
         if(this.fstring != "") {
             this.EmailString+='<div id="floats" class="plzfloat" style="width:600px;float:left;margin-bottom:10px;">'+
-                '<p style="text-align:center;font-weight:bold">Learning Outcomes</p>'+
+                '<p style="text-align:center;font-weight:bold">Early Years Learning Framework Outcomes</p>'+
                 '<div style="font-size:12px">'+ this.fstring +
             '</div>';
         }
