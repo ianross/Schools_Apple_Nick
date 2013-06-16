@@ -176,7 +176,7 @@ function TryUploadImages() {
         options.timeout = 10000;
 
         var ft = new FileTransfer();
-        ft.upload(cImage, "http://54.252.153.178/school/upload",UploadImageSuccess, UploadImageFail, options);
+        ft.upload(cImage, "http://192.168.1.4/school/upload",UploadImageSuccess, UploadImageFail, options);
     }
     else {
         uploadPhotoCB();
@@ -215,8 +215,8 @@ function TryUploadData() {
     if(SendData.cc == null) { SendData.cc = ""; }
 
     $.ajax({
-        url: "http://54.252.153.178/school/content",
-        //url: "http://localhost:10080/school/content",
+        //url: "http://54.252.153.178/school/content",
+        url: "http://192.168.1.4:10080/school/content",
         timeout: 10000,
         type: "POST",
         data: JSON.stringify({uuid: SendData.uuid, cc:SendData.cc, to:SendData.email, body: emailString}),
