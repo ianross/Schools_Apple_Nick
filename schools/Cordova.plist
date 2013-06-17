@@ -30,6 +30,7 @@
 	<array>
 		<string>http://ec2-23-22-186-167.compute-1.amazonaws.com</string>
 		<string>http://54.252.153.178</string>	
+		<string>*</string>	
 	</array>
 	<key>Plugins</key>
 	<dict>
