@@ -176,8 +176,8 @@ function TryUploadImages() {
         options.timeout = 10000;
 
         var ft = new FileTransfer();
-        //ft.upload(cImage, "http://ec2-54-252-153-178.ap-southeast-2.compute.amazonaws.com/school/upload",UploadImageSuccess, UploadImageFail, options);
-        ft.upload(cImage, "http://ec2-23-22-186-167.compute-1.amazonaws.com/school/upload",UploadImageSuccess, UploadImageFail, options);
+        ft.upload(cImage, "http://ec2-54-252-153-178.ap-southeast-2.compute.amazonaws.com/school/upload",UploadImageSuccess, UploadImageFail, options);
+        //ft.upload(cImage, "http://ec2-23-22-186-167.compute-1.amazonaws.com/school/upload",UploadImageSuccess, UploadImageFail, options);
 
     }
     else {
@@ -217,8 +217,8 @@ function TryUploadData() {
     if(SendData.cc == null) { SendData.cc = ""; }
 
     $.ajax({
-        url: "http://ec2-23-22-186-167.compute-1.amazonaws.com/school/content",
-        //url: "http://ec2-54-252-153-178.ap-southeast-2.compute.amazonaws.com/school/content",
+        //url: "http://ec2-23-22-186-167.compute-1.amazonaws.com/school/content",
+        url: "http://ec2-54-252-153-178.ap-southeast-2.compute.amazonaws.com/school/content",
         //url: "http://192.168.1.4:10080/school/content",
         timeout: 10000,
         type: "POST",
@@ -248,16 +248,16 @@ function TryUploadData() {
 
             if(t==="timeout") {
                 navigator.notification.alert(
-                    //'Timed Out - The report failed to send to the server for emailing. Please ensure you have an active data connection and try again',  // message
-                    x + '_' + t + '_' + m,
+                    'Timed Out - The report failed to send to the server for emailing. Please ensure you have an active data connection and try again',  // message
+                    //x + '_' + t + '_' + m,
                     function() {},         // callback
                     'Report Email Failed',            // title
                     'Close'                  // buttonName
                 );
             } else {
                 navigator.notification.alert(
-                    //'An error has occurred. Please ensure your data connection is still active and try again.',  // message
-                    x + '_' + t + '_' + m,
+                    'An error has occurred. Please ensure your data connection is still active and try again.',  // message
+                    //x + '_' + t + '_' + m,
                     function() {},         // callback
                     'Report Email Failed',            // title
                     'Close'                  // buttonName
