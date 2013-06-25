@@ -157,7 +157,7 @@ Email.prototype.GenerateEmail = function(template) {
             '<table width="100%" style="margin-bottom:5px;padding-bottom:5px;">' +
                 '<tr valign="top">' +
                     '<td width="100%" height=210 colspan="1" align="center">' +
-                    '<img src="cid:1.jpg" width="193" height="200" style="border:none;">' +
+                    '<img src="cid:' + SendData.uuid + '1.jpg" width="193" height="200" style="border:none;width:none !important; max-width:none !important; max-width:none !important">' +
                     '</td>' +
                 '</tr>' +
             '</table>' +
@@ -177,10 +177,10 @@ Email.prototype.GenerateEmail = function(template) {
             '<table width="100%" style="margin-bottom:5px;padding-bottom:5px;">' +
                 '<tr valign="top">' +
                     '<td width="50%" height=210 colspan="1" align="center">' +
-                        '<img src="cid:1.jpg" width="193" height="200" style="border:none;">' +
+                        '<img src="cid:' + SendData.uuid + '1.jpg" width="193" height="200" style="border:none;width:none !important; max-width:none !important; max-width:none !important">' +
                     '</td>' +
                     '<td width="50%" height=210 colspan="1" align="center">' +
-                        '<img src="cid:2.jpg" width="193" height="200" style="border:none;">' +
+                        '<img src="cid:' + SendData.uuid + '2.jpg" width="193" height="200" style="border:none;width:none !important; max-width:none !important; max-width:none !important">' +
                     '</td>' +
                 '</tr>' +
             '</table>' +
@@ -201,13 +201,13 @@ Email.prototype.GenerateEmail = function(template) {
             '<table width="100%" style="margin-bottom:5px;padding-bottom:5px;">' +
                 '<tr valign="top">' +
                     '<td width="30%" height=210 colspan="1" align="center">' +
-                        '<img src="cid:1.jpg" width="193" height="200" style="border:none;">' +
+                        '<img src="cid:' + SendData.uuid + '1.jpg" width="193" height="200" style="border:none;width:none !important; max-width:none !important; max-width:none !important">' +
                     '</td>' +
                     '<td width="30%" height=210 colspan="1" align="center">' +
-                        '<img src="cid:2.jpg" width="193" height="200" style="border:none;">' +
+                        '<img src="cid:' + SendData.uuid + '2.jpg" width="193" height="200" style="border:none;width:none !important; max-width:none !important; max-width:none !important">' +
                     '</td>' +
                     '<td width="30%" height=210 colspan="1" align="center">' +
-                        '<img src="cid:3.jpg" width="193" height="200" style="border:none;">' +
+                        '<img src="cid:' + SendData.uuid + '3.jpg" width="193" height="200" style="border:none;width:none !important; max-width:none !important; max-width:none !important">' +
                     '</td>' +
                 '</tr>' +
             '</table>' +
