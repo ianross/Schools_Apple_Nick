@@ -1058,7 +1058,9 @@ function onSubmitReport(test) {
         var other = document.getElementById("TRinput").value;
 
         //Get follow up & evaluation if any
+        var followuptitle = $("#followuptitle").val();
         var followup = $("#followuptext").val();
+        var evaluationtitle = $("#evaluationtitle").val();
         var evaluation = $("#evaluationtext").val();
 
         //Check title / date / email
@@ -1070,7 +1072,9 @@ function onSubmitReport(test) {
         SendData.notes = NOTES;
         SendData.email = email;
         SendData.cc = other;
+        SendData.followuptitle = followuptitle;
         SendData.followupexperience = followup;
+        SendData.evaluationtitle = evaluationtitle;
         SendData.evaluation = evaluation;
         SendData.type = ReportType;
         SendData.imageData = ReportImages.slice(0);
@@ -1081,7 +1085,7 @@ function onSubmitReport(test) {
         SendData.principles = SelectedPrinciples;
         SendData.practices = SelectedPractices;
 
-        var randuuid = 'xxxxxxxx4xxxyxxx'.replace(/[xy]/g, function(c) {
+        var randuuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
             var r = Math.random()*16|0, v = c == 'x' ? r : (r&0x3|0x8);
             return v.toString(16);
         });
@@ -1966,6 +1970,10 @@ margin: 0 auto;
     <div data-role="collapsible" data-collapsed = "true" data-theme = "e">
         <h3>Follow Up Experience</h3>
         <div data-role="fieldcontain">
+            <label for="followuptitle"></label>
+            <input type="text" id="followuptitle" value="Follow-Up Experience" placeholder="Enter Custom Title"></input>
+        </div>
+        <div data-role="fieldcontain">
             <label for="followuptext"></label>
             <textarea name="textarea" id="followuptext"></textarea>
         </div>
@@ -1973,6 +1981,10 @@ margin: 0 auto;
 
     <div data-role="collapsible" data-collapsed = "true" data-theme = "f">
         <h3>Evaluation</h3>
+        <div data-role="fieldcontain">
+            <label for="evaluationtitle"></label>
+            <input type="text" id="evaluationtitle" value="Evaluation" placeholder="Enter Custom Title"></input>
+        </div>
         <div data-role="fieldcontain">
             <label for="evaluationtext"></label>
             <textarea name="textarea" id="evaluationtext"></textarea>

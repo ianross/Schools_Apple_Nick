@@ -1,4 +1,4 @@
-function Email(title,date,images,captions,notes,followupexperience,evaluation,type,background,font,template, outcomes, colour, principles, practices) {
+function Email(title,date,images,captions,notes,followuptitle, followupexperience,evaluationtitle, evaluation,type,background,font,template, outcomes, colour, principles, practices) {
 
     this.title = title;
     this.date = date;
@@ -8,6 +8,9 @@ function Email(title,date,images,captions,notes,followupexperience,evaluation,ty
 
     this.notes = notes;
     this.fnotes = "";
+
+    this.followtitle = followuptitle;
+    this.evaluationtitle = evaluationtitle;
 
     this.follow = followupexperience;
     this.evaluation = evaluation;
@@ -257,8 +260,8 @@ Email.prototype.GenerateEmail = function(template) {
         }
 
         if(this.evaluation != "" || this.follow != "") {
-            if(this.evaluation != "") { this.EmailString+='<th width="'+ width + '%" colspan="1" align="center">Evaluation</th>'; }
-            else { this.EmailString+='<th width="'+ width + '%" colspan="1" align="center">Follow-up Experience</th>';}
+            if(this.evaluation != "") { this.EmailString+='<th width="'+ width + '%" colspan="1" align="center">' + this.evaluationtitle +' </th>'; }
+            else { this.EmailString+='<th width="'+ width + '%" colspan="1" align="center">' + this.followtitle + '</th>';}
         }
 
         if(this.fstring != "") {
@@ -277,7 +280,7 @@ Email.prototype.GenerateEmail = function(template) {
             if(this.evaluation != "") {
                 this.EmailString +='<p style="font-size:12px">'+ this.evaluation +'</p>';
                 if(this.follow != "") {
-                    this.EmailString +='<p style="text-align:center;font-weight:bold">Follow-Up Experience</p><p style="font-size:12px">'+ this.follow +'</p>';
+                    this.EmailString +='<p style="text-align:center;font-weight:bold">' + this.followtitle + '</p><p style="font-size:12px">'+ this.follow +'</p>';
                 }
             } else {
                 this.EmailString +='<p style="font-size:12px">'+ this.follow +'</p>';
@@ -303,13 +306,13 @@ Email.prototype.GenerateEmail = function(template) {
 
         if(this.evaluation != "") {
             this.EmailString+='<div id="floats" class="plzfloat" style="width:600px;float:left;margin-bottom:10px;">'+
-                '<p style="text-align:center;font-weight:bold">Evaluation</p>'+
+                '<p style="text-align:center;font-weight:bold">' + this.evaluationtitle + '</p>'+
                 '<p style="font-size:12px">'+ this.evaluation +'</p>'+
                 '</div>';
         }
         if(this.follow != "") {
             this.EmailString+='<div id="floats" class="plzfloat" style="width:600px;float:left;margin-bottom:10px;">'+
-                '<p style="text-align:center;font-weight:bold">Follow-Up Experience</p>'+
+                '<p style="text-align:center;font-weight:bold">' + this.followtitle + '</p>'+
                 '<p style="font-size:12px">'+ this.follow +'</p>'
             '</div>';
         }
