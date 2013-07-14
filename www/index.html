@@ -1053,6 +1053,7 @@ function onSubmitReport(test) {
         //List of notes
         var NOTES = ReportCheckBoxesNotes;
 
+
         //Get email address
         var email = document.getElementById("eInputReport").value;
         var other = document.getElementById("TRinput").value;
@@ -1070,6 +1071,7 @@ function onSubmitReport(test) {
         SendData.images = ReportImages.length;
         SendData.captions = ReportCaptions;
         SendData.notes = NOTES;
+        SendData.notesTitle = $('#observationtitle').val();
         SendData.email = email;
         SendData.cc = other;
         SendData.followuptitle = followuptitle;
@@ -1848,7 +1850,10 @@ margin: 0 auto;
 
     <div data-role="collapsible" data-collapsed = "true" data-theme = "c">
         <h3>Observations</h3>
-
+        <div data-role="fieldcontain">
+            <label for="observationtitle"></label>
+            <input type="text" id="observationtitle" value="Observations" placeholder="Enter Custom Title"></input>
+        </div>
         <ul id="ReportNotes" data-role="listview" data-theme="b" style="margin-top:10px;margin-bottom: 10px">
         </ul>
     </div>

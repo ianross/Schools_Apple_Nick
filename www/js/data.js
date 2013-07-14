@@ -212,7 +212,7 @@ function TryUploadData() {
     SendData.practices = [2,2,2,2,2,2];
     */
 
-    var emailObj = new Email(SendData.title, SendData.date, SendData.images, SendData.captions, SendData.notes, SendData.followuptitle, SendData.followupexperience, SendData.evaluationtitle, SendData.evaluation, SendData.type, SendData.Background, SendData.Font, SendData.template, SendData.outcomes, SendData.FontColour, SendData.principles, SendData.practices);
+    var emailObj = new Email(SendData.title, SendData.date, SendData.images, SendData.captions, SendData.notes, SendData.notesTitle, SendData.followuptitle, SendData.followupexperience, SendData.evaluationtitle, SendData.evaluation, SendData.type, SendData.Background, SendData.Font, SendData.template, SendData.outcomes, SendData.FontColour, SendData.principles, SendData.practices);
     var emailString = emailObj.GenerateEmail(SendData.template);
     if(SendData.cc == null) { SendData.cc = ""; }
 
