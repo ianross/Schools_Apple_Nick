@@ -254,7 +254,6 @@ function dropTables() {
 }
 
 function StartDB() {
-
     if (!window.openDatabase) {
         // not all mobile devices support databases  if it does not, the following alert will display
         // indicating the device will not be albe to run this application
@@ -588,7 +587,13 @@ function PrepDBData(arr) {
     return outputString;
 
 }
-
+if(navigator.notification == undefined) {
+    navigator.notification = {};
+    navigator.notification.alert = function(msg, cb) {
+        alert(msg);
+        cb();
+    }
+}
 StartDB();
 //AddValueToDB("Fred Pryor", "src/sds.jpg;src/sdsa/jpg", "dis kid such a lil nigger u wldnt believe it bro; ashdasd asdjh asjds a")
 //RemoveStudentFromDB("Fred Pryor")

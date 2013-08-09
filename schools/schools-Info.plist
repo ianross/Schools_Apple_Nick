@@ -16,10 +16,10 @@
 		<dict>
 			<key>CFBundleIconFiles</key>
 			<array>
-				<string>icon.png</string>
-				<string>icon@2x.png</string>
-				<string>icon-72.png</string>
-				<string>icon-72@2x.png</string>
+				<string>Icon.png</string>
+				<string>Icon@2x.png</string>
+				<string>Icon-72.png</string>
+				<string>Icon-72@2x.png</string>
 			</array>
 			<key>UIPrerenderedIcon</key>
 			<false/>
@@ -37,22 +37,52 @@
 	<string>????</string>
 	<key>CFBundleVersion</key>
 	<string>1.0</string>
+	<key>ExternalHosts</key>
+	<array>
+		<string>http://ec2-23-22-186-167.compute-1.amazonaws.com</string>
+		<string>http://ec2-54-252-153-178.ap-southeast-2.compute.amazonaws.com</string>
+	</array>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSMainNibFile</key>
 	<string></string>
 	<key>NSMainNibFile~ipad</key>
 	<string></string>
+	<key>Plugins</key>
+	<dict>
+		<key>Camera</key>
+		<string>CDVCamera</string>
+		<key>Capture</key>
+		<string>CDVCapture</string>
+		<key>Debug Console</key>
+		<string>CDVDebugConsole</string>
+		<key>Device</key>
+		<string>CDVDevice</string>
+		<key>Echo</key>
+		<string>CDVEcho</string>
+		<key>File</key>
+		<string>CDVFile</string>
+		<key>FileTransfer</key>
+		<string>CDVFileTransfer</string>
+		<key>Logger</key>
+		<string>CDVLogger</string>
+		<key>NetworkStatus</key>
+		<string>CDVConnection</string>
+		<key>Notification</key>
+		<string>CDVNotification</string>
+		<key>SplashScreen</key>
+		<string>CDVSplashScreen</string>
+	</dict>
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
 	</array>
 	<key>UISupportedInterfaceOrientations~ipad</key>
 	<array>
-		<string>UIInterfaceOrientationPortrait</string>
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationPortraitUpsideDown</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
+		<string>UIInterfaceOrientationPortrait</string>
 	</array>
 </dict>
 </plist>
